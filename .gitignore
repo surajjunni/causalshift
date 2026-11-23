@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# CausalShift local stores / outputs
+*.db
+benchmark/out/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+*.swp

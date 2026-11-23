@@ -1,0 +1,11 @@
+{
+  "workflow_id": "real",
+  "targets": {
+    "responder": {
+      "prompt_id": "respond.bad"
+    }
+  },
+  "prompts": {
+    "respond.bad": "You are the responder. Reply with a single vague word, nothing else."
+  }
+}

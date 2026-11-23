@@ -1,0 +1,1737 @@
+{
+  "workflow_id": "demo",
+  "graph": {
+    "nodes": [
+      "root",
+      "mid",
+      "side",
+      "leaf"
+    ],
+    "edges": [
+      [
+        "root",
+        "mid"
+      ],
+      [
+        "mid",
+        "leaf"
+      ],
+      [
+        "root",
+        "side"
+      ]
+    ]
+  },
+  "trajectories": [
+    {
+      "trajectory_id": "demo-t0",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "9.771842",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "b63bd3510780e5da",
+          "output": "10.771842",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "17c7099359a9b57b",
+          "output": "10.771842",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "bc5552297c302fe8",
+          "output": "11.771842",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t1",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "9.703033",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "ea3d95d3eb7e6074",
+          "output": "10.703033",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "1915fbdac119e34e",
+          "output": "10.703033",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "80ed8a5bf34bbf1b",
+          "output": "11.703033",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t2",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "10.790185",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "241848e2f382fab8",
+          "output": "11.790185",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "f88a7a179668ec7a",
+          "output": "11.790185",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "8a90496dfd2acf1b",
+          "output": "12.790185",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t3",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "10.682178",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "306110569dd0afa2",
+          "output": "11.682178",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "62b79cd29f04485a",
+          "output": "11.682178",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "5cc0f15cea38e8ea",
+          "output": "12.682178",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t4",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "8.859941",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "db4e4dc0172172e9",
+          "output": "9.859941",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "15d6388c26bd6bcb",
+          "output": "9.859941",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "927ea5cf48885f7a",
+          "output": "10.859941",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t5",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "10.851876",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "c3b6923a7541341f",
+          "output": "11.851876",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "b1253e9c9b0cf4ad",
+          "output": "11.851876",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "ea0948be52423047",
+          "output": "12.851876",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t6",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "8.784445",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "4b485aec3733d31b",
+          "output": "9.784445",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "d9b7d50c5094df1e",
+          "output": "9.784445",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "1334546a050bdf26",
+          "output": "10.784445",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t7",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "10.138822",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "05fb0ba4384f1eb3",
+          "output": "11.138822",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "85310657cfa2eb61",
+          "output": "11.138822",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "e45ba97d350a4a34",
+          "output": "12.138822",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t8",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "8.913836",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "c6c40ba716472794",
+          "output": "9.913836",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "06245817e13f2ce3",
+          "output": "9.913836",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "66177d1588755b55",
+          "output": "10.913836",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t9",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "9.430684",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "55ad5d386c5a5a71",
+          "output": "10.430684",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "f5f34d21f969de2d",
+          "output": "10.430684",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "92e37cebcf4217b5",
+          "output": "11.430684",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t10",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "9.053146",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "ea0b3df801142c0d",
+          "output": "10.053146",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "2730c941037daed0",
+          "output": "10.053146",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "c2a661ebebfa618d",
+          "output": "11.053146",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t11",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "9.700052",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "92b1afa8f43359a2",
+          "output": "10.700052",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "8f04012f1f147867",
+          "output": "10.700052",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "25545f3acdda56f3",
+          "output": "11.700052",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t12",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "9.881260",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "8262710d8571337b",
+          "output": "10.881260",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "0217324f0af8b049",
+          "output": "10.881260",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "662b686ab634226d",
+          "output": "11.881260",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t13",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "8.599794",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "5dc0c73dbf6fd2a0",
+          "output": "9.599794",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "c3f4afd50dd08699",
+          "output": "9.599794",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "9d52192943f67216",
+          "output": "10.599794",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t14",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "10.218797",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "9587ffe90f6c27ab",
+          "output": "11.218797",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "11cf1a26976a9996",
+          "output": "11.218797",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "edd130644a00a39f",
+          "output": "12.218797",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t15",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "8.885119",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "59359b4ff118336f",
+          "output": "9.885119",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "1454ecc42b7fe091",
+          "output": "9.885119",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "02718c4763c74490",
+          "output": "10.885119",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t16",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "9.865707",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "821f1ae96335a081",
+          "output": "10.865707",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "21d4331878818686",
+          "output": "10.865707",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "1d128ce590e522c5",
+          "output": "11.865707",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t17",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "11.177617",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "8f269a26902d5a60",
+          "output": "12.177617",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "7342ca5165a1bc8c",
+          "output": "12.177617",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "c48224751dc95bcc",
+          "output": "13.177617",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t18",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "10.754039",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "2853b82f22786d99",
+          "output": "11.754039",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "70012f7ecba172e1",
+          "output": "11.754039",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "ac24129fc2f9f314",
+          "output": "12.754039",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t19",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "11.994789",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "fdf0cc90272e6212",
+          "output": "12.994789",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "3b3c4c0fb317b7aa",
+          "output": "12.994789",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "6076de9a3983eeb9",
+          "output": "13.994789",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t20",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "9.354806",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "116fcda436859426",
+          "output": "10.354806",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "a0df1c732b38c4e2",
+          "output": "10.354806",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "17ed9f95ac7c2215",
+          "output": "11.354806",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t21",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "10.082526",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "31850845df2d940c",
+          "output": "11.082526",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "e7bdc431977eeff5",
+          "output": "11.082526",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "b116118126aeaaa0",
+          "output": "12.082526",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t22",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "11.642868",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "577c10a6d7ca785b",
+          "output": "12.642868",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "5541eaf6b612203b",
+          "output": "12.642868",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "c5f748e94bda1b59",
+          "output": "13.642868",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t23",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "7.820367",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "fd9fb48eca0b6221",
+          "output": "8.820367",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "d932fb31d3c586e4",
+          "output": "8.820367",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "25f627c3bb7854c5",
+          "output": "9.820367",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t24",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "10.510882",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "8e3f91946293afb7",
+          "output": "11.510882",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "2d30334724998580",
+          "output": "11.510882",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "61b95819ffab5c24",
+          "output": "12.510882",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t25",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "8.630932",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "322d89fc7551ebe6",
+          "output": "9.630932",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "7cf887aa8bbc6cf3",
+          "output": "9.630932",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "dbbfa453bc876a51",
+          "output": "10.630932",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t26",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "10.831473",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "f88d8a2875603b96",
+          "output": "11.831473",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "c042a724d196fce0",
+          "output": "11.831473",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "d7d4e43d614b526c",
+          "output": "12.831473",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t27",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "8.558566",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "6e127e652ec7f1fc",
+          "output": "9.558566",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "9ed093c5e2e6f321",
+          "output": "9.558566",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "b4383a3435d633b9",
+          "output": "10.558566",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t28",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "9.954228",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "6e55a1eb2d0ccffc",
+          "output": "10.954228",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "7fa8cdfd876c9410",
+          "output": "10.954228",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "1b72f0b81f0d7481",
+          "output": "11.954228",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    },
+    {
+      "trajectory_id": "demo-t29",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "root",
+          "input_fingerprint": "36570e155df3c061",
+          "output": "10.173513",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "mid",
+          "input_fingerprint": "ac626f3d81164ce4",
+          "output": "11.173513",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "side",
+          "input_fingerprint": "e39802aeb89f6461",
+          "output": "11.173513",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "leaf",
+          "input_fingerprint": "cd1c6d6ddc4786a7",
+          "output": "12.173513",
+          "model_id": "A",
+          "prompt_id": "p0",
+          "cost": {
+            "tokens": 10,
+            "latency_ms": 1.0
+          }
+        }
+      ],
+      "ground_truth": {
+        "fault_node": "mid",
+        "regresses": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "workflow_id": "cyclic",
+  "graph": {
+    "nodes": [
+      "a",
+      "b"
+    ],
+    "edges": [
+      [
+        "a",
+        "b"
+      ],
+      [
+        "b",
+        "a"
+      ]
+    ]
+  },
+  "trajectories": []
+}
