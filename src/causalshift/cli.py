@@ -14,7 +14,7 @@ from causalshift.graph.dag import DependencyGraph
 from causalshift.intervene.apply import validate_intervention
 from causalshift.models import Intervention
 from causalshift.replay.engine import full_replay, selective_replay
-from causalshift.report.verdict import build_verdict, format_verdict
+from causalshift.report.verdict import build_verdict, format_verdict, verdict_exit_code
 from causalshift.store.db import TraceStore, load_workflow
 from causalshift.store.validate import TraceInputError
 
@@ -77,7 +77,8 @@ def _cmd_evaluate(args) -> int:
         print(json.dumps(verdict.__dict__, indent=2, default=list))
     else:
         print(format_verdict(verdict))
-    return 1 if verdict.regressed else 0
+    # Fail closed: inconclusive → exit 2 (never a silent pass), regressed → 1, else 0.
+    return verdict_exit_code(verdict)
 
 
 def _cmd_benchmark(args) -> int:

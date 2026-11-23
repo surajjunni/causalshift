@@ -23,7 +23,7 @@ def test_regressing_case_detected():
     v = _verdict(case)
     assert v.regressed
     assert v.ci_high < 0            # CI entirely below zero
-    assert v.false_negative_risk is None  # full mode never reuses
+    assert v.reuse_exposure is None  # full mode never reuses
 
 
 def test_non_regressing_case_not_flagged():

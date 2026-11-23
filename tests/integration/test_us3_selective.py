@@ -30,7 +30,7 @@ def test_selective_agrees_with_full_on_normal_case_and_reuses():
     # root is a source outside the affected set → it is reused
     assert any(d.action == REUSED and d.node_name == "root" for d in sel_res[0].decisions)
     # selective always reports a false-negative risk (headline)
-    assert sel.false_negative_risk is not None
+    assert sel.reuse_exposure is not None
 
 
 def test_missing_edge_produces_a_false_negative():

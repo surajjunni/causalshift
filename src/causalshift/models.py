@@ -105,7 +105,7 @@ class RegressionVerdict:
     ci_low: float
     ci_high: float
     attribution: list[tuple[str, float]] = field(default_factory=list)  # (node, contribution)
-    false_negative_risk: Optional[float] = None   # headline when reuse happened
+    reuse_exposure: Optional[float] = None   # fraction of nodes reused (NOT a probability)
     inconclusive: int = 0
     notes: list[str] = field(default_factory=list)  # measured-vs-assumed tags
 

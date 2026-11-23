@@ -22,23 +22,33 @@ def build_verdict(workflow_id: str, mode: str, results: list[ReplayResult],
         "magnitude/CI are MEASURED by bootstrap over trajectories",
         "regressed = CI of (candidate-baseline) lies entirely below 0",
     ]
-    fn_risk = None
+    exposure = None
     if mode == "selective":
-        fn_risk = reuse_fraction(results)
+        exposure = reuse_fraction(results)
         notes.append(
-            "false_negative_risk is an UPPER BOUND (reuse fraction) at eval time; "
-            "the true rate is MEASURED only by `causalshift benchmark`"
+            "reuse_exposure is the fraction of nodes REUSED — an exposure measure, "
+            "NOT a probability of a missed regression. The actual false-negative "
+            "RATE is measured against ground truth only by `causalshift benchmark`"
         )
     if inconclusive:
         notes.append(f"{inconclusive} trajectory(ies) inconclusive (backend could not "
-                     f"recompute an affected node) — excluded, never counted as safe")
+                     f"recompute a node) — excluded; evaluation fails closed, never 'safe'")
 
     return RegressionVerdict(
         workflow_id=workflow_id, mode=mode, n_trajectories=len(results),
         regressed=regressed, magnitude=mean, ci_low=lo, ci_high=hi,
-        attribution=attribution or [], false_negative_risk=fn_risk,
+        attribution=attribution or [], reuse_exposure=exposure,
         inconclusive=inconclusive, notes=notes,
     )
+
+
+def verdict_exit_code(v: RegressionVerdict) -> int:
+    """CI exit semantics (fail closed): 2 if any trajectory was inconclusive,
+    else 1 if a regression was detected, else 0. An inconclusive run is NEVER a
+    pass (Constitution: Soundness Over Savings)."""
+    if v.inconclusive > 0:
+        return 2
+    return 1 if v.regressed else 0
 
 
 def format_verdict(v: RegressionVerdict) -> str:
@@ -48,9 +58,11 @@ def format_verdict(v: RegressionVerdict) -> str:
         f"  regressed         {'YES' if v.regressed else 'no'}",
         f"  magnitude         {v.magnitude:+.4f}  (95% CI [{v.ci_low:+.4f}, {v.ci_high:+.4f}])",
     ]
-    if v.false_negative_risk is not None:
-        lines.append(f"  false_negative_risk (HEADLINE)  {v.false_negative_risk:.3f}  "
-                     f"[upper bound = reuse fraction]")
+    if v.reuse_exposure is not None:
+        lines.append(f"  reuse_exposure    {v.reuse_exposure:.3f}  "
+                     f"[fraction of nodes reused; NOT a miss probability — see benchmark]")
+    if v.inconclusive:
+        lines.append(f"  INCONCLUSIVE      {v.inconclusive} trajectory(ies) → fails closed (exit 2)")
     if v.attribution:
         top = ", ".join(f"{n} ({c:+.3f})" for n, c in v.attribution[:3])
         lines.append(f"  attribution       {top}")
