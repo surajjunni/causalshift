@@ -17,7 +17,9 @@ for p in (str(_ROOT), str(_ROOT / "src")):
         sys.path.insert(0, p)
 
 from causalshift.attribute.causal import attribute          # noqa: E402
+from causalshift.evaluate.population import bootstrap_mean_ci  # noqa: E402
 from causalshift.evaluate.quality import TerminalSignalEvaluator  # noqa: E402
+from causalshift.soundness.ledger import reuse_fraction     # noqa: E402
 from causalshift.graph.dag import DependencyGraph           # noqa: E402
 from causalshift.models import ComparisonReport             # noqa: E402
 from causalshift.replay.engine import full_replay, selective_replay  # noqa: E402
@@ -41,6 +43,8 @@ def run(corpus=None):
     attr_hits = attr_total = 0
     sc = fc = st = ft = 0
     sl = fl = 0.0
+    missed_flags = []          # per full-regressed case: 1.0 if selective missed it
+    all_sel_results = []
 
     for case in corpus:
         graph = DependencyGraph(case.workflow)
@@ -48,10 +52,13 @@ def run(corpus=None):
         for t in case.workflow.trajectories:
             full_results.append(full_replay(t, graph, case.intervention, case.backend, evaluator))
             sel_results.append(selective_replay(t, graph, case.intervention, case.backend, evaluator))
+        all_sel_results.extend(sel_results)
         fv = build_verdict(case.case_id, "full", full_results)
         sv = build_verdict(case.case_id, "selective", sel_results)
         full_reg.append(fv.regressed)
         sel_reg.append(sv.regressed)
+        if fv.regressed:       # a real regression (per the sound oracle)
+            missed_flags.append(1.0 if not sv.regressed else 0.0)
         sc += sum(r.calls for r in sel_results); fc += sum(r.calls for r in full_results)
         st += sum(r.tokens for r in sel_results); ft += sum(r.tokens for r in full_results)
         sl += sum(r.latency_ms for r in sel_results); fl += sum(r.latency_ms for r in full_results)
@@ -66,6 +73,7 @@ def run(corpus=None):
     n = len(corpus)
     agreement = sum(1 for s, f in zip(sel_reg, full_reg) if s == f) / n
     fn = false_negative_rate(sel_reg, full_reg)
+    _, m_lo, m_hi = bootstrap_mean_ci(missed_flags) if missed_flags else (0.0, 0.0, 0.0)
     attribution_acc = attr_hits / attr_total if attr_total else 1.0
 
     return ComparisonReport(
@@ -73,6 +81,8 @@ def run(corpus=None):
         attribution_accuracy=attribution_acc,
         selective_calls=sc, full_calls=fc, selective_tokens=st, full_tokens=ft,
         selective_latency_ms=sl, full_latency_ms=fl,
+        missed_ci_low=m_lo, missed_ci_high=m_hi,
+        reuse_exposure=reuse_fraction(all_sel_results),
     )
 
 
@@ -101,11 +111,16 @@ def main(argv=None):
         print("=" * 64)
         print(f"  cases                 {rep.n_cases}")
         print(f"  detection_agreement   {rep.detection_agreement:.3f}")
-        print(f"  missed_regressions    {rep.missed_regressions:.3f}   (HEADLINE false-negative)")
+        print(f"  missed_regressions    {rep.missed_regressions:.3f}  "
+              f"[95% CI {rep.missed_ci_low:.3f}, {rep.missed_ci_high:.3f}]  (HEADLINE false-negative RATE)")
+        print(f"  reuse_exposure        {rep.reuse_exposure:.3f}   (fraction of nodes reused)")
         print(f"  attribution_accuracy  {rep.attribution_accuracy:.3f}")
         print(f"  calls selective/full  {rep.selective_calls}/{rep.full_calls}  "
               f"(ratio {rep.call_ratio:.3f})")
         print(f"  latency sel/full ms   {rep.selective_latency_ms:.0f}/{rep.full_latency_ms:.0f}")
+        print("  dependency-completeness assumption: false negatives are bounded ONLY for")
+        print("  dependencies the declared graph captures; undeclared edges are measured")
+        print("  here via planted missing-edge cases, not guaranteed absent in the wild.")
         print("=" * 64)
     ok = _gate(rep)
     print("GATE: PASS" if ok else "GATE: FAIL (false-negative bound exceeded)")

@@ -132,6 +132,9 @@ class ComparisonReport:
     full_tokens: int
     selective_latency_ms: float
     full_latency_ms: float
+    missed_ci_low: float = 0.0       # 95% bootstrap CI on the missed-regression rate
+    missed_ci_high: float = 0.0
+    reuse_exposure: float = 0.0      # aggregate fraction of nodes reused by selective
 
     @property
     def call_ratio(self) -> float:

@@ -10,6 +10,9 @@ def test_normal_corpus_passes_gate():
     assert rep.missed_regressions <= SC["false_neg"]
     assert _gate(rep) is True
     assert rep.call_ratio < 1.0            # selective is cheaper than full
+    # missed-regression rate carries a confidence interval that brackets it
+    assert rep.missed_ci_low <= rep.missed_regressions <= rep.missed_ci_high
+    assert 0.0 <= rep.reuse_exposure <= 1.0
 
 
 def test_unsound_corpus_fails_gate():
