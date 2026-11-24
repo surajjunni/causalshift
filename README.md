@@ -101,6 +101,30 @@ risk) — which `reuse_exposure` and the benchmark then measure, not hide. For
 nodes with hidden cross-state reads, add the edges or use the explicit seam.
 `examples/langgraph_agent.py` runs with no LLM. Install: `pip install "causalshift[langgraph]"`.
 
+### Other frameworks
+
+| Framework | How | Status |
+|---|---|---|
+| **LangGraph** | `adapters.langgraph.trace_from_langgraph(app, inputs)` | live-tested |
+| **MLflow Tracing** | `adapters.mlflow.trace_from_mlflow(traces)` (span_id/parent_id → edges) | shim over the span core; validate vs your MLflow version |
+| **CrewAI** | `adapters.crewai.trace_from_crewai(tasks, crew.kickoff())` — task `context` → edges | validate vs your CrewAI version |
+| **OpenAI Agents SDK / LlamaIndex / OpenTelemetry** | normalize their spans to `{name, parent, output}` and call `adapters.spans.trace_from_spans(traces)` | generic span core (tested) |
+
+Span-based recipe (covers any tracing stack):
+
+```python
+from causalshift.adapters.spans import trace_from_spans
+# each trajectory = a list of spans; span = {"name", "parent": <parent node name|None>, "output"}
+trace = trace_from_spans([[{"name": "retrieve", "parent": None, "output": docs},
+                           {"name": "answer", "parent": "retrieve", "output": ans}]])
+```
+
+Same soundness caveat applies to all: a span/parent tree is control-flow, so it
+can under-declare true data dependencies — measured by `reuse_exposure` and the
+benchmark, not hidden. The span core is tested; the per-framework shims are
+validated against documented object shapes — confirm against your installed
+version (and open an issue if a field moved).
+
 ## How it relates to other tools (honest scope)
 
 CausalShift occupies a gap the adjacent tools state they do **not** fill:
