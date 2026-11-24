@@ -156,6 +156,12 @@ negatives), attribution accuracy, model-call count, token cost, and latency.
   whose per-node dependencies are declared once, so a captured trace is
   immediately replayable. Capturing dependencies for opaque or arbitrary agents
   remains out of scope (FR-011).
+- **FR-015**: System SHOULD provide framework capture adapters that build a
+  conformant trace from an existing agent with minimal code — a generic
+  span-based core (span name → node, parent → dependency edge) plus thin shims
+  (LangGraph, MLflow Tracing, CrewAI). Because control-flow spans can
+  under-declare true data dependencies, adapters MUST carry the missing-edge
+  caveat, which `reuse_exposure` and the benchmark then measure (never hide).
 
 ### Key Entities *(include if feature involves data)*
 

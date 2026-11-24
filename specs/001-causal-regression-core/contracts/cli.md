@@ -25,8 +25,19 @@ exit 2 as well as 1.
 ### `causalshift benchmark [--json]`
 Run the injected-fault benchmark: selective vs full across cases with known
 ground truth. Emits the ComparisonReport (detection agreement, **missed
-regressions**, attribution accuracy, calls, tokens, latency). This is the
-primary quality gate.
+regressions** with a 95% CI, attribution accuracy, reuse exposure, calls,
+tokens, latency). This is the primary quality gate.
+
+### `causalshift diff --workflow <id> --intervention <spec> [--backend ...] [--evaluator ...] [--json]`
+The one-command "is this change safe?" report (selective mode): plain-language
+PASS / FAIL / INCONCLUSIVE + impact (magnitude + CI) + changed step + model
+calls saved vs the fair baseline + reuse_exposure. Same 0/1/2 exit codes.
+
+### Backends (`--backend`, on `evaluate` and `diff`)
+`none` (default; recompute unavailable → affected nodes inconclusive), `ollama`
+(local), `openai`, `anthropic`. Cloud backends read the API key from the
+ENVIRONMENT (`OPENAI_API_KEY` / `ANTHROPIC_API_KEY`), never from the CLI and
+never logged, and fail closed (missing key / error → inconclusive, exit 2).
 
 ## Rules
 

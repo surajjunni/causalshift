@@ -93,6 +93,9 @@ requires `validity_checked = valid`. Any uncertain validity ⇒ `recomputed`
 
 ## ComparisonReport (selective vs full)
 
-- per metric: `detection_agreement`, `missed_regressions` (false negatives),
-  `attribution_accuracy`, `call_count`, `token_cost`, `latency_ms`
-- each with its uncertainty where applicable
+- per metric: `detection_agreement`, `missed_regressions` (false-negative rate)
+  with `missed_ci_low` / `missed_ci_high` (95% bootstrap CI over labeled cases),
+  `attribution_accuracy`, `reuse_exposure` (aggregate fraction of nodes reused),
+  `call_count`, `token_cost`, `latency_ms`
+- the headline false-negative rate carries its CI; other metrics report
+  uncertainty where applicable

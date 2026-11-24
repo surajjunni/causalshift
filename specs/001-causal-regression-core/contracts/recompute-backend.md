@@ -30,6 +30,11 @@ recompute(node_name: str,
   population CIs.
 - Default backend: a thin local-model client (e.g. Ollama over `urllib`). A
   `max_calls` budget bounds live cost; exceeding it returns `Unavailable`.
+- Cloud backends (OpenAI, Anthropic) read the API key from the environment
+  (`OPENAI_API_KEY` / `ANTHROPIC_API_KEY`), never from arguments and never
+  logged. A missing key, any HTTP error, or an exhausted budget returns
+  `Unavailable` (fail closed), so affected nodes go inconclusive — never "safe".
+  Source nodes (no declared inputs) are echoed, not regenerated.
 
 ## Non-goal
 

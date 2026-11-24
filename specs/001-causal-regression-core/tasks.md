@@ -130,6 +130,25 @@ Hardening from the static code review; soundness and fair measurement.
   `examples/live_agent.py --evaluate` (record on Ollama + evaluate a prompt
   change; recording and replay share prompt-construction).
 
+## Phase 9: Adoption — legibility, backends, framework capture
+
+- [X] T047 One-command risk report: `causalshift diff` + `report/diff.py`
+  (PASS/FAIL/INCONCLUSIVE + impact/CI + changed step + calls saved + exposure);
+  tests in `tests/unit/test_diff_report.py`.
+- [X] T048 Benchmark reports a 95% bootstrap CI on the missed-regression rate +
+  aggregate `reuse_exposure` + a dependency-completeness note
+  (`benchmark/run_benchmark.py`, `ComparisonReport`).
+- [X] T049 [FR-015] Framework capture adapters: generic `adapters/spans.py`
+  (span→trace core) + `adapters/langgraph.py` (live-tested) + `adapters/mlflow.py`
+  + `adapters/crewai.py`; examples + `tests/integration/test_adapters.py`,
+  `test_langgraph_adapter.py`. OpenAI Agents SDK / LlamaIndex route via the span
+  core. All carry the missing-edge caveat.
+- [X] T050 Cloud recompute backends `backends/cloud.py` (OpenAI, Anthropic): key
+  from env, never logged; fail closed to `Unavailable`; `--backend openai|anthropic`
+  on evaluate/diff; `tests/unit/test_cloud_backend.py` (offline — no live calls).
+- [X] T051 Project hygiene: MIT LICENSE, GitHub Actions CI (pytest + offline
+  benchmark gate), repo description/topics.
+
 ## Dependencies & Story Completion Order
 
 - **Setup (P1 phase 1)** → **Foundational (phase 2)** block everything.
