@@ -17,10 +17,11 @@ attribution, and — for any reuse — the `reuse_exposure` headline (fraction o
 nodes reused; an exposure measure, not a miss probability). `--mode full` is the
 sound baseline; `--mode selective` is dependency-aware replay.
 
-**Exit codes (fail closed):** `0` = conclusive, no regression; `1` = regression
-detected (CI entirely below zero); `2` = inconclusive (the backend could not
-recompute a node) — an inconclusive run is NEVER a silent pass, so CI blocks on
-exit 2 as well as 1.
+**Exit codes (fail closed):** `0` = PASS (enough evidence, no regression); `1` =
+FAIL (regression — CI below the margin); `2` = INCONCLUSIVE — the backend could
+not recompute a node, OR there is insufficient evidence (fewer than the minimum
+usable trajectories), OR the CI straddles the non-inferiority margin. An
+inconclusive/insufficient run is NEVER a silent pass; CI blocks on 2 as well as 1.
 
 ### `causalshift benchmark [--json]`
 Run the injected-fault benchmark: selective vs full across cases with known

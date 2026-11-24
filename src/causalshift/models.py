@@ -107,6 +107,8 @@ class RegressionVerdict:
     attribution: list[tuple[str, float]] = field(default_factory=list)  # (node, contribution)
     reuse_exposure: Optional[float] = None   # fraction of nodes reused (NOT a probability)
     inconclusive: int = 0
+    status: Optional[str] = None             # "PASS" | "FAIL" | "INCONCLUSIVE"
+    n_usable: int = 0                        # trajectories with a usable (conclusive) delta
     notes: list[str] = field(default_factory=list)  # measured-vs-assumed tags
 
 
@@ -135,6 +137,7 @@ class ComparisonReport:
     missed_ci_low: float = 0.0       # 95% bootstrap CI on the missed-regression rate
     missed_ci_high: float = 0.0
     reuse_exposure: float = 0.0      # aggregate fraction of nodes reused by selective
+    full_missed: float = 0.0         # full re-execution's own miss rate vs independent truth
 
     @property
     def call_ratio(self) -> float:

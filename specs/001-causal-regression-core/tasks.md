@@ -149,6 +149,16 @@ Hardening from the static code review; soundness and fair measurement.
 - [X] T051 Project hygiene: MIT LICENSE, GitHub Actions CI (pytest + offline
   benchmark gate), repo description/topics.
 
+## Phase 10: Statistical rigor (review response)
+
+- [X] T052 [FR-016] Fail closed on insufficient evidence: three-way verdict
+  status (PASS/FAIL/INCONCLUSIVE), minimum usable-sample requirement, optional
+  non-inferiority margin; `report/verdict.py`, `models.py`;
+  `tests/unit/test_evidence.py` (empty/tiny samples no longer pass).
+- [X] T053 [FR-017] Benchmark measures the false-negative rate vs INDEPENDENT
+  ground truth (not full_replay) and reports `full_missed` as an oracle-quality
+  check (`benchmark/run_benchmark.py`, `ComparisonReport`).
+
 ## Dependencies & Story Completion Order
 
 - **Setup (P1 phase 1)** → **Foundational (phase 2)** block everything.

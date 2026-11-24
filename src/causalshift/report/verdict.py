@@ -11,16 +11,38 @@ from causalshift.soundness.ledger import reuse_fraction
 
 
 def build_verdict(workflow_id: str, mode: str, results: list[ReplayResult],
-                  attribution: Optional[list[tuple[str, float]]] = None) -> RegressionVerdict:
+                  attribution: Optional[list[tuple[str, float]]] = None,
+                  min_samples: int = 3, epsilon: float = 0.0) -> RegressionVerdict:
+    """Three-way, fail-closed verdict.
+
+    - INCONCLUSIVE (exit 2) if any trajectory was inconclusive OR there are fewer
+      than `min_samples` usable trajectories (insufficient evidence — never a
+      silent PASS), OR (when a non-inferiority margin `epsilon` > 0 is set) the CI
+      straddles the margin so non-regression cannot be demonstrated.
+    - FAIL (exit 1) if the CI of (candidate - baseline) lies below -epsilon.
+    - PASS (exit 0) only with enough evidence that quality did not regress.
+    """
     usable = [r for r in results if not r.inconclusive]
     inconclusive = len(results) - len(usable)
     deltas = [r.delta for r in usable]
     mean, lo, hi = bootstrap_mean_ci(deltas)
-    regressed = is_regression(hi)
+    regressed = hi < -epsilon
+
+    enough = len(usable) >= min_samples and inconclusive == 0
+    if not enough:
+        status = "INCONCLUSIVE"
+    elif regressed:
+        status = "FAIL"
+    elif epsilon > 0 and lo < -epsilon:
+        status = "INCONCLUSIVE"          # CI straddles the non-inferiority margin
+    else:
+        status = "PASS"
 
     notes = [
         "magnitude/CI are MEASURED by bootstrap over trajectories",
-        "regressed = CI of (candidate-baseline) lies entirely below 0",
+        f"status fail-closed: need >= {min_samples} usable trajectories and no "
+        f"inconclusive ones to conclude (usable={len(usable)}, inconclusive={inconclusive})",
+        f"regressed = CI of (candidate-baseline) lies below -epsilon (epsilon={epsilon})",
     ]
     exposure = None
     if mode == "selective":
@@ -36,16 +58,19 @@ def build_verdict(workflow_id: str, mode: str, results: list[ReplayResult],
 
     return RegressionVerdict(
         workflow_id=workflow_id, mode=mode, n_trajectories=len(results),
-        regressed=regressed, magnitude=mean, ci_low=lo, ci_high=hi,
+        regressed=(status == "FAIL"), magnitude=mean, ci_low=lo, ci_high=hi,
         attribution=attribution or [], reuse_exposure=exposure,
-        inconclusive=inconclusive, notes=notes,
+        inconclusive=inconclusive, notes=notes, status=status, n_usable=len(usable),
     )
 
 
 def verdict_exit_code(v: RegressionVerdict) -> int:
-    """CI exit semantics (fail closed): 2 if any trajectory was inconclusive,
-    else 1 if a regression was detected, else 0. An inconclusive run is NEVER a
-    pass (Constitution: Soundness Over Savings)."""
+    """CI exit semantics (fail closed): 0 PASS / 1 FAIL / 2 INCONCLUSIVE. An
+    inconclusive or insufficient-evidence run is NEVER a pass (Constitution:
+    Soundness Over Savings)."""
+    if v.status is not None:
+        return {"PASS": 0, "FAIL": 1, "INCONCLUSIVE": 2}.get(v.status, 2)
+    # fallback for directly-constructed verdicts without a status
     if v.inconclusive > 0:
         return 2
     return 1 if v.regressed else 0
@@ -54,10 +79,14 @@ def verdict_exit_code(v: RegressionVerdict) -> int:
 def format_verdict(v: RegressionVerdict) -> str:
     lines = [
         f"CausalShift verdict [{v.workflow_id}] mode={v.mode}",
-        f"  trajectories      {v.n_trajectories} (inconclusive: {v.inconclusive})",
-        f"  regressed         {'YES' if v.regressed else 'no'}",
+        f"  status            {v.status or ('FAIL' if v.regressed else 'PASS')}",
+        f"  trajectories      {v.n_trajectories} (usable: {v.n_usable}, "
+        f"inconclusive: {v.inconclusive})",
         f"  magnitude         {v.magnitude:+.4f}  (95% CI [{v.ci_low:+.4f}, {v.ci_high:+.4f}])",
     ]
+    if v.status == "INCONCLUSIVE" and v.inconclusive == 0:
+        lines.append("  reason            insufficient evidence (too few usable "
+                     "trajectories) → fails closed")
     if v.reuse_exposure is not None:
         lines.append(f"  reuse_exposure    {v.reuse_exposure:.3f}  "
                      f"[fraction of nodes reused; NOT a miss probability — see benchmark]")

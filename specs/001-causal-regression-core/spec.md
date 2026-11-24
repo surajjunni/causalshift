@@ -156,6 +156,16 @@ negatives), attribution accuracy, model-call count, token cost, and latency.
   whose per-node dependencies are declared once, so a captured trace is
   immediately replayable. Capturing dependencies for opaque or arbitrary agents
   remains out of scope (FR-011).
+- **FR-016**: The verdict MUST fail closed on insufficient statistical evidence:
+  with fewer than a configured minimum of usable trajectories (or any
+  inconclusive trajectory) it MUST return INCONCLUSIVE (exit 2), never PASS — an
+  empty or tiny sample is not a non-regression. A configurable non-inferiority
+  margin MAY be set so PASS requires positive evidence that quality did not drop
+  beyond the margin; a CI straddling the margin is INCONCLUSIVE.
+- **FR-017**: The benchmark MUST measure the false-negative rate against
+  INDEPENDENT ground truth (derived from the true dependency graph at
+  construction), not against the replay engine's own full re-execution, and MUST
+  also report full re-execution's own miss rate as an oracle-quality check.
 - **FR-015**: System SHOULD provide framework capture adapters that build a
   conformant trace from an existing agent with minimal code — a generic
   span-based core (span name → node, parent → dependency edge) plus thin shims

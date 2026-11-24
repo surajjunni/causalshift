@@ -76,7 +76,9 @@ requires `validity_checked = valid`. Any uncertain validity ⇒ `recomputed`
 ## RegressionVerdict (population-level)
 
 - `intervention`, `n_trajectories`
-- `regressed` — bool (CI-based)
+- `status` — `PASS` | `FAIL` | `INCONCLUSIVE` (fail closed on insufficient
+  evidence); `regressed` is the legacy bool (= status FAIL)
+- `n_usable` — usable (conclusive) trajectories; below the minimum ⇒ INCONCLUSIVE
 - `magnitude`, `ci_low`, `ci_high`
 - `attribution` — ranked responsible node(s) with confidence
 - `reuse_exposure` — fraction of nodes reused (headline for any reuse); an
@@ -96,6 +98,7 @@ requires `validity_checked = valid`. Any uncertain validity ⇒ `recomputed`
 - per metric: `detection_agreement`, `missed_regressions` (false-negative rate)
   with `missed_ci_low` / `missed_ci_high` (95% bootstrap CI over labeled cases),
   `attribution_accuracy`, `reuse_exposure` (aggregate fraction of nodes reused),
-  `call_count`, `token_cost`, `latency_ms`
-- the headline false-negative rate carries its CI; other metrics report
-  uncertainty where applicable
+  `call_count`, `token_cost`, `latency_ms`, plus `full_missed` (full
+  re-execution's own miss rate vs truth — an oracle-quality check)
+- the headline false-negative rate is measured vs INDEPENDENT ground truth and
+  carries its CI; other metrics report uncertainty where applicable
