@@ -77,14 +77,14 @@ causalshift evaluate --workflow real --intervention examples/bad_prompt.json \
 causalshift evaluate ... --mode full --no-attribution    # same verdict, far more calls
 ```
 
-Both modes agree the change **regressed** quality (CI entirely below 0), and
-selective uses fewer recompute calls by reusing the unaffected planner/retriever.
-NOTE: compare against the *fair* single-pass `--mode full` baseline (v0.2); the
-earlier "5 vs 75" figure came from a non-terminating repeated-pass full replay
-and overstated the saving — re-measure both modes and report the real ratio. The
-judge is stochastic: a single score carries noise the trajectory bootstrap does
-not fully capture (raise judge `k`). An inconclusive run (backend could not
-recompute a node) exits non-zero — it is never a silent pass.
+Measured (llama3, 5 trajectories, v0.2 fair single-pass baseline): both modes
+agree the change **regressed** quality (CI entirely below 0); **selective used 5
+recompute calls vs full's 15** (ratio 0.33), reusing the unaffected
+planner/retriever. (The earlier "5 vs 75" came from a non-terminating
+repeated-pass full replay and overstated the saving; v0.2's full re-execution is
+one pass per node.) The judge is stochastic: a single score carries noise the
+trajectory bootstrap does not fully capture (raise judge `k`). An inconclusive
+run (backend could not recompute a node) exits 2 — never a silent pass.
 
 ## Out-of-contract check
 
