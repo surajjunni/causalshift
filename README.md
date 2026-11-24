@@ -56,8 +56,13 @@ agent.save("trace.json")         # ready for `causalshift ingest`
 
 Declared `deps=` are the dependency edges — the honest level of instrumentation
 (explicit DAG). The emitted fingerprints are exactly what the replay validity
-predicate consumes, so a captured trace is immediately replayable. Runnable
-end-to-end (no LLM) in `examples/instrumented_agent.py`.
+predicate consumes, so a captured trace is immediately replayable.
+
+- `examples/instrumented_agent.py` — the seam on a pure-Python agent (no LLM).
+- `examples/live_agent.py --evaluate` — the seam on a live Ollama agent, which
+  records a trace *and* evaluates a prompt change end to end. Measured (llama3,
+  4 trajectories): both modes detect the regression; **selective 4 recompute
+  calls vs full 12** (same prompt-construction for record and replay).
 
 ## How it relates to other tools (honest scope)
 
