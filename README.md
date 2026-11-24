@@ -12,6 +12,8 @@ PASS / FAIL / INCONCLUSIVE verdict with the **false-negative rate as the headlin
 metric**. Works with LangGraph, MLflow, CrewAI, the OpenAI Agents SDK, and
 OpenTelemetry traces; local (Ollama) or cloud (OpenAI/Anthropic) models.
 
+📝 **Launch post:** [Your agent's prompt change passed CI. Did it actually get *worse*?](https://surajjyothiunni1.substack.com/p/your-agents-prompt-change-passed)
+
 > You're about to swap a model or edit a prompt behind a production agent. On
 > your *real* recorded traffic — not hand-written test cases — will quality
 > regress, which step is responsible, and can you find out cheaply?
