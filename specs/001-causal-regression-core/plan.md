@@ -11,7 +11,8 @@ model/prompt change, CausalShift produces a population-level regression verdict
 (regressed? magnitude + confidence interval), attributes it to the responsible
 node(s), and does so via **dependency-aware selective replay** that recomputes
 only causally-affected nodes and reuses recorded outputs only when provably
-valid — always reporting the measured false-negative risk of that reuse. A sound
+valid — always reporting the reuse exposure (fraction reused; not a miss
+probability — the false-negative rate is benchmark-measured). A sound
 full re-execution path is the baseline and the correctness oracle; an
 injected-fault benchmark with known ground truth is the primary quality gate.
 
@@ -34,8 +35,8 @@ reproducible, offline-runnable).
 **Project Type**: single Python package (library + CLI).
 
 **Performance Goals**: selective replay reaches the full-re-execution verdict
-using ≤50% of model calls (SC-003); core benchmark runs offline without paid
-APIs.
+using strictly fewer model calls than the fair single-pass baseline (SC-003;
+measured ratio reported); core benchmark runs offline without paid APIs.
 
 **Constraints**: soundness is gating — no state reuse without a validity proof;
 recompute backend (local model, e.g. Ollama) is pluggable and MUST degrade
@@ -51,7 +52,7 @@ per evaluation, single-digit-to-dozens of nodes per trajectory.
 
 | Principle | Gate | Status |
 |---|---|---|
-| I. Soundness Over Savings | Selective replay reuses a step ONLY behind a validity predicate; uncertain → recompute; false-negative rate measured + reported every run. Full re-execution is the sound oracle. | PASS (by design; enforced in `replay/` + `soundness/`) |
+| I. Soundness Over Savings | Selective replay reuses a step ONLY behind a validity predicate; uncertain → recompute; reuse_exposure reported every run and the false-negative RATE measured by the benchmark; inconclusive runs fail closed. Single-pass full re-execution is the sound oracle. | PASS (enforced in `replay/` + `soundness/`; CLI exit 2 on inconclusive) |
 | II. Reuse/Recompute/Quantify | Every reuse decision records its justification; escalation on uncertainty is the default. | PASS |
 | III. Measured, Not Asserted | Injected-fault benchmark with ground truth backs all SC claims; CIs via bootstrap; reports tag measured vs assumed. | PASS (enforced in `benchmark/` + `report/`) |
 | IV. Scope Honesty | DAG-only; cyclic/opaque-stateful trajectories rejected/flagged (FR-011). | PASS |
@@ -84,8 +85,9 @@ src/causalshift/
 ├── graph/          # dependency-DAG model over steps; causal-closure (affected set)
 ├── intervene/      # intervention engine: substitute model/prompt at named nodes
 ├── backends/       # recompute backends: base interface, local (ollama), unavailable
-├── replay/         # full re-execution baseline + selective replay + validity predicate
-├── soundness/      # false-negative accounting / reuse-justification ledger
+├── replay/         # single-pass full re-execution + dynamic selective replay + validity predicate
+├── soundness/      # reuse-exposure + false-negative accounting ledger
+├── instrument.py   # light instrumentation seam: @node(deps=...) auto-captures traces (FR-014)
 ├── evaluate/       # population evaluator; bootstrap confidence intervals
 ├── attribute/      # regression attribution to responsible node(s)
 ├── report/         # reporting layer; measured-vs-assumed tagging

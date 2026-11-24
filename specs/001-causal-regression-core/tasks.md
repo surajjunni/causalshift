@@ -69,10 +69,10 @@ reuse, reporting the measured false-negative risk.
 **Independent test**: Selective agrees with full on the benchmark at ≥ SC-001,
 ≤ SC-003 of the calls, with false-negative rate measured and ≤ SC-002.
 
-- [X] T022 [US3] Implement the validity predicate in `src/causalshift/replay/validity.py`: a recorded step is reusable ONLY if `not in affected_set` AND its `input_fingerprint` is unchanged under the intervention; any uncertainty ⇒ not reusable (fail toward recompute) (research.md; FR-004/FR-005; data-model.md `ReplayDecision`)
-- [X] T023 [US3] Implement selective replay in `src/causalshift/replay/selective.py`: recompute affected nodes + any node failing the validity predicate; reuse the rest; record a ReplayDecision with justification for every step (FR-005)
-- [X] T024 [US3] Implement the soundness ledger / false-negative accounting in `src/causalshift/soundness/ledger.py`: from ReplayDecisions + ground truth (when present) compute the measured false-negative rate / upper bound; this is the headline figure (FR-009, SC-002)
-- [X] T025 [US3] Extend RegressionVerdict/report so any reuse surfaces `false_negative_risk` as the headline line (not a footnote) per contracts/cli.md
+- [X] T022 [US3] Implement the validity predicate in `src/causalshift/replay/validity.py`: a recorded step is reusable ONLY if its `input_fingerprint` is unchanged under the intervention; any uncertainty ⇒ not reusable (fail toward recompute) (research.md; FR-004/FR-005; data-model.md `ReplayDecision`)
+- [X] T023 [US3] Implement DYNAMIC selective replay in `src/causalshift/replay/engine.py`: recompute a node iff it is an intervention target OR its declared inputs actually changed (validity fails); reuse (prune) unchanged descendants; record a ReplayDecision with justification for every step (FR-004/FR-005). Supersedes static descendant closure.
+- [X] T024 [US3] Implement the soundness ledger in `src/causalshift/soundness/ledger.py`: per-run `reuse_exposure` (fraction reused, an exposure measure), and the measured false-negative RATE from ReplayDecisions + ground truth for the benchmark (FR-009, SC-002)
+- [X] T025 [US3] Extend RegressionVerdict/report so any reuse surfaces `reuse_exposure` as the headline line (not mislabeled as a miss probability), per contracts/cli.md
 - [X] T026 [US3] Add `--mode selective` to `causalshift evaluate` in `src/causalshift/cli.py`
 - [X] T027 [P] [US3] Integration test in `tests/integration/test_us3_selective.py`: reuse happens only for valid out-of-affected-set steps; uncertain validity ⇒ recomputed with justification; selective verdict == full verdict on the fixture; `false_negative_risk` present and numeric
 
@@ -85,7 +85,7 @@ reuse, reporting the measured false-negative risk.
 - [X] T028 Implement injected-fault generators in `benchmark/faults/inject.py`: plant a known faulty node (regressing / non-regressing), including **missing-dependency-edge** cases that create false-negative risk (spec Edge Cases; data-model.md `BenchmarkCase`)
 - [X] T029 [P] Generate seeded synthetic DAG fixtures in `benchmark/fixtures/` (incl. `demo_workflow.json`, `demo_intervention.json`, `cyclic_workflow.json` used by quickstart.md), reproducible from a fixed seed
 - [X] T030 Implement the benchmark runner in `benchmark/run_benchmark.py`: run selective vs full across cases, emit ComparisonReport — detection_agreement, missed_regressions (false negatives), attribution_accuracy, call_count, token_cost, latency_ms (data-model.md `ComparisonReport`; FR-010)
-- [X] T031 Add gate assertions in `benchmark/run_benchmark.py`: compare measured metrics to SC targets (SC-001 ≥0.95, SC-002 ≤0.05, SC-003 ≤0.50, SC-004 ≥0.80); print measured values (measured-not-asserted) and exit non-zero if the false-negative bound is exceeded
+- [X] T031 Add gate assertions in `benchmark/run_benchmark.py`: compare measured metrics to SC targets (SC-001 ≥0.95, SC-002 ≤0.05, SC-003 call_ratio <1.0 vs the fair single-pass baseline, SC-004 ≥0.80); print measured values (measured-not-asserted) and exit non-zero if ANY criterion fails (all thresholds gate; soundness non-negotiable)
 - [X] T032 Wire `causalshift benchmark [--json]` in `src/causalshift/cli.py` per contracts/cli.md
 - [X] T033 [P] Test the benchmark harness in `tests/integration/test_benchmark_gate.py`: a deliberately unsound reuse rule makes false negatives rise and the gate fail (proves the gate actually bites)
 
@@ -98,6 +98,37 @@ reuse, reporting the measured false-negative risk.
 - [X] T036 [P] Measured-vs-assumed audit across all CLI/report output in `src/causalshift/report/` (FR-012)
 - [X] T037 Verify `quickstart.md` runs end to end against the built package; fix any drift
 - [X] T038 [P] Package metadata + install check (`pip install -e .`, `causalshift --help`), and a short CONTRIBUTING note on the benchmark being the merge gate
+
+## Phase 8: v0.2 — Sound Selective Replay (review response)
+
+Hardening from the static code review; soundness and fair measurement.
+
+- [X] T039 Fail closed: `verdict_exit_code` + CLI returns exit 2 when any
+  trajectory is inconclusive (backend could not recompute), never a silent pass
+  (`report/verdict.py`, `cli.py`; contracts/cli.md). Tests in
+  `tests/unit/test_exit_code.py`.
+- [X] T040 Rename `false_negative_risk` → `reuse_exposure` everywhere and relabel
+  it as an exposure measure, reserving "false-negative rate" for the benchmark
+  (`models.py`, `report/verdict.py`, CLI, data-model/spec/contracts).
+- [X] T041 Make full re-execution a single deterministic topological pass (one
+  recompute per node); remove the non-terminating fixpoint loop for a FAIR
+  baseline (`replay/engine.py`). Stochastic-termination test in
+  `tests/integration/test_soundness_paths.py`.
+- [X] T042 Dynamic selective pruning: recompute only targets + changed-input
+  nodes, reuse unchanged descendants (`replay/engine.py`).
+- [X] T043 Benchmark gate enforces ALL success criteria; call-ratio criterion is
+  the honest "< 1.0 vs the fair baseline" with the measured ratio reported
+  (`benchmark/run_benchmark.py`).
+- [X] T044 Soundness-path tests: unavailable backend → inconclusive/fail-closed,
+  selective target unavailable (`tests/integration/test_soundness_paths.py`).
+- [X] T045 [FR-014] Light instrumentation seam `causalshift/instrument.py`
+  (`@agent.node(deps=...)` auto-captures inputs/outputs/fingerprints; declare
+  deps once); example `examples/instrumented_agent.py`; tests
+  `tests/integration/test_instrument.py` (trace validates, round-trips, and its
+  fingerprints are reusable by the validity predicate).
+- [X] T046 [FR-014] Wire the seam into a live end-to-end demo
+  `examples/live_agent.py --evaluate` (record on Ollama + evaluate a prompt
+  change; recording and replay share prompt-construction).
 
 ## Dependencies & Story Completion Order
 

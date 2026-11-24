@@ -31,26 +31,32 @@ by the benchmark — not results).
 
 ## Decision: Validity predicate gates reuse; fail toward recompute
 
-- **Decision**: A recorded step's output may be reused only if (a) it is outside
-  the causally-affected set AND (b) a validity predicate confirms its relevant
-  inputs and environmental assumptions are unchanged. If the predicate cannot
-  confirm validity, recompute (escalate).
+- **Decision (v0.2, dynamic pruning)**: A node is recomputed iff it is an
+  intervention target OR a validity predicate shows its declared inputs actually
+  changed; otherwise the recorded output is reused (pruned). If validity cannot
+  be confirmed, recompute (escalate). This supersedes the earlier "recompute the
+  whole declared descendant closure" approach: an unchanged descendant is now
+  reused, which is the real "recompute only causally-affected nodes".
 - **Rationale**: Directly implements Constitution Principles I & II. The
   predicate is the single point where soundness is enforced, so it is isolated
-  and auditable.
-- **Alternatives**: "reuse everything after the cut-point unless proven changed"
-  (rejected — this is the unsound conservative inverse that silently misses
-  regressions; it is exactly the prototype weakness CausalShift fixes).
+  and auditable; dynamic pruning adds efficiency without weakening it.
+- **Alternatives**: static descendant closure (rejected — recomputes unchanged
+  nodes, wasteful); "reuse everything after the cut-point unless proven changed"
+  (rejected — the unsound inverse that silently misses regressions).
 
-## Decision: Full re-execution baseline as the correctness oracle
+## Decision: Single-pass full re-execution as the correctness oracle
 
-- **Decision**: Implement full re-execution (recompute the whole affected
-  trajectory, no reuse) first; it is sound by construction and the oracle the
-  benchmark measures selective replay against.
-- **Rationale**: Gives a trustworthy P1 verdict before any efficiency work, and
-  a ground-truth-independent cross-check: selective and full must agree.
-- **Alternatives**: ship selective-only (rejected — nothing to validate against;
-  violates priority order).
+- **Decision (v0.2)**: Full re-execution is a single deterministic topological
+  pass — each node recomputed exactly once, consuming its predecessors'
+  recomputed outputs. It is sound w.r.t. dependencies respected by the declared
+  topological order and the oracle the benchmark measures selective against.
+- **Rationale**: One pass TERMINATES and gives a FAIR, well-defined call-count
+  baseline. The earlier repeat-until-stable fixpoint never converges for
+  stochastic models and inflated full's cost, making the efficiency comparison
+  unfair (review finding).
+- **Alternatives**: repeated-pass fixpoint (rejected — non-terminating for
+  stochastic nodes, unfair baseline); ship selective-only (rejected — nothing to
+  validate against).
 
 ## Decision: Bootstrap confidence intervals for population effect
 

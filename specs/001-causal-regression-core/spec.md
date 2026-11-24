@@ -89,8 +89,10 @@ negatives), attribution accuracy, model-call count, token cost, and latency.
    selective replay processes it, **Then** it recomputes that step rather than
    reusing the recorded output, and records why.
 3. **Given** any run that reused recorded state, **When** the user views the
-   report, **Then** the measured false-negative risk (or its bound) is shown as
-   the headline figure.
+   report, **Then** the reuse exposure (fraction of nodes reused) is shown as the
+   headline figure, clearly labeled as an exposure measure — not a probability of
+   a missed regression. The actual false-negative RATE is measured against ground
+   truth by the benchmark (FR-013), never claimed per-run.
 
 ---
 
@@ -135,7 +137,10 @@ negatives), attribution accuracy, model-call count, token cost, and latency.
 - **FR-008**: System MUST attribute a detected regression to the responsible
   node(s), with a confidence measure.
 - **FR-009**: System MUST always measure and report, as the headline figure, the
-  false-negative risk (or an upper bound) introduced by any state reuse.
+  reuse exposure (the fraction of nodes whose recorded output was reused) for any
+  run that reused state, labeled as an exposure measure — NOT a false-negative
+  probability. The empirical false-negative RATE is measured only by the
+  benchmark (FR-013).
 - **FR-010**: System MUST produce a comparison of selective replay versus full
   re-execution covering: detection agreement, missed regressions, attribution
   accuracy, model-call count, token cost, and wall-clock latency.
@@ -146,6 +151,11 @@ negatives), attribution accuracy, model-call count, token cost, and latency.
 - **FR-013**: System MUST provide an injected-fault benchmark with known ground
   truth so that attribution accuracy and false-negative rate are measurable, and
   the benchmark MUST be runnable reproducibly without any paid-API dependency.
+- **FR-014**: System MUST provide a light instrumentation seam that captures a
+  conformant trace (per-node inputs, outputs, and fingerprints) from an agent
+  whose per-node dependencies are declared once, so a captured trace is
+  immediately replayable. Capturing dependencies for opaque or arbitrary agents
+  remains out of scope (FR-011).
 
 ### Key Entities *(include if feature involves data)*
 
@@ -160,7 +170,7 @@ negatives), attribution accuracy, model-call count, token cost, and latency.
 - **Replay result**: per-trajectory outcome of an intervention, recording for
   each step whether it was reused or recomputed and why.
 - **Regression verdict**: population-level outcome — regressed or not, magnitude,
-  confidence interval, responsible node(s), and the reuse false-negative risk.
+  confidence interval, responsible node(s), and the reuse exposure.
 - **Benchmark case**: a trajectory set with a planted fault and known ground
   truth (which node, whether it regresses) used to measure accuracy.
 
@@ -174,8 +184,10 @@ negatives), attribution accuracy, model-call count, token cost, and latency.
 - **SC-002**: The missed-regression (false-negative) rate of selective replay is
   measured on the benchmark and is at most 5%, and is always reported with the
   verdict.
-- **SC-003**: Selective replay reaches the verdict using at most 50% of the
-  model calls required by full re-execution, at equal detection agreement.
+- **SC-003**: Selective replay reaches the verdict using strictly fewer model
+  calls than the FAIR single-pass full re-execution baseline (ratio < 1.0), at
+  equal detection agreement; the measured ratio is reported, not asserted. (An
+  earlier "≤50%" target assumed a repeated-pass full baseline that was not fair.)
 - **SC-004**: Regression attribution names the responsible node with at least
   80% accuracy on single-fault benchmark cases.
 - **SC-005**: Every reported regression magnitude carries a confidence interval,
@@ -186,12 +198,12 @@ negatives), attribution accuracy, model-call count, token cost, and latency.
 ## Assumptions
 
 - The numeric targets in SC-001 through SC-005 (95% agreement, ≤5% false
-  negatives, ≤50% calls, ≥80% attribution, ≤5% false alarms) are v1 targets to
-  be calibrated against the benchmark; they are reported as measured values and
-  revised only with evidence, never asserted.
-- Trajectories are supplied by an upstream, explicitly instrumented capture step
-  that retains inputs and dependency edges; producing that instrumentation for
-  arbitrary agents is out of scope for this feature.
+  negatives, call ratio < 1.0 vs the fair baseline, ≥80% attribution, ≤5% false
+  alarms) are v1 targets to be calibrated against the benchmark; they are
+  reported as measured values and revised only with evidence, never asserted.
+- Trajectories come from the light instrumentation seam (FR-014), which captures
+  inputs, outputs and fingerprints once per-node dependencies are declared;
+  capturing dependencies for opaque or arbitrary agents remains out of scope.
 - v1 covers deterministic, DAG-style agents only; cyclic and opaque-stateful
   agents are out of scope and handled by rejection/flagging (FR-011).
 - A locally runnable model is available for recomputation during benchmarking,

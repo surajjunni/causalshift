@@ -53,12 +53,17 @@ The proposed change under test.
 
 - `step_index`, `node_name`
 - `action` — `reused` | `recomputed`
-- `justification` — why reuse was sound, or why escalated to recompute
-- `in_affected_set` — bool
+- `justification` — why reuse was sound, or why it was recomputed
+- `in_affected_set` — bool; v0.2 meaning: this node was FORCED to recompute
+  because it is an intervention target (selective replay no longer precomputes a
+  static descendant closure — see Rules)
 - `validity_checked` — bool, and predicate outcome
 
-Rules (soundness ledger): `action = reused` requires `in_affected_set = false`
-AND `validity_checked = true (valid)`. Any uncertain validity ⇒ `recomputed`.
+Rules (soundness ledger, v0.2 dynamic pruning): a node is recomputed iff it is
+an intervention target OR its declared inputs actually changed (the validity
+predicate fails); otherwise it is `reused` (pruned). `action = reused` therefore
+requires `validity_checked = valid`. Any uncertain validity ⇒ `recomputed`
+(fail toward recompute).
 
 ## ReplayResult (per trajectory)
 
@@ -74,7 +79,11 @@ AND `validity_checked = true (valid)`. Any uncertain validity ⇒ `recomputed`.
 - `regressed` — bool (CI-based)
 - `magnitude`, `ci_low`, `ci_high`
 - `attribution` — ranked responsible node(s) with confidence
-- `false_negative_risk` — measured rate or upper bound from reuse (headline)
+- `reuse_exposure` — fraction of nodes reused (headline for any reuse); an
+  exposure measure, NOT a false-negative probability. The empirical
+  false-negative rate is measured by the benchmark, not per-run.
+- `inconclusive` — count of trajectories the backend could not recompute; a run
+  with any inconclusive trajectory fails closed (CLI exit 2), never "safe"
 - `measured_vs_assumed` — tags on each reported figure
 
 ## BenchmarkCase
