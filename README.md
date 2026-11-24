@@ -29,6 +29,36 @@ causalshift benchmark                                # the injected-fault qualit
 See `specs/001-causal-regression-core/quickstart.md` for runnable scenarios and
 `specs/001-causal-regression-core/contracts/` for the input/backend/CLI contracts.
 
+## Instrumenting your agent (the light seam)
+
+Capturing a trace is the one thing a user must add. The seam is deliberately
+small: **declare each node's dependencies once**, and inputs, outputs and
+fingerprints are captured automatically.
+
+```python
+from causalshift.instrument import InstrumentedAgent
+
+agent = InstrumentedAgent("support")
+
+@agent.node("planner", deps=["question"], prompt_id="plan.v1", prompt="Plan how to answer.")
+def planner(question): ...
+
+@agent.node("responder", deps=["planner"], prompt_id="respond.v1", prompt="Answer using the plan.")
+def responder(planner): ...
+
+for i, q in enumerate(questions):
+    with agent.trajectory(f"t{i}") as run:
+        run.set("question", q)   # a source input
+        run.run_all()            # runs nodes in dependency order, capturing each
+
+agent.save("trace.json")         # ready for `causalshift ingest`
+```
+
+Declared `deps=` are the dependency edges — the honest level of instrumentation
+(explicit DAG). The emitted fingerprints are exactly what the replay validity
+predicate consumes, so a captured trace is immediately replayable. Runnable
+end-to-end (no LLM) in `examples/instrumented_agent.py`.
+
 ## How it relates to other tools (honest scope)
 
 CausalShift occupies a gap the adjacent tools state they do **not** fill:

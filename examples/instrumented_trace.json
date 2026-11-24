@@ -1,0 +1,297 @@
+{
+  "workflow_id": "faq",
+  "graph": {
+    "nodes": [
+      "question",
+      "classify",
+      "retrieve",
+      "answer"
+    ],
+    "edges": [
+      [
+        "question",
+        "classify"
+      ],
+      [
+        "classify",
+        "retrieve"
+      ],
+      [
+        "retrieve",
+        "answer"
+      ]
+    ]
+  },
+  "prompts": {
+    "classify.v1": "Classify the question into a topic id.",
+    "retrieve.v1": "Return facts for the classified topic.",
+    "answer.v1": "Write the answer using the retrieved facts."
+  },
+  "trajectories": [
+    {
+      "trajectory_id": "faq-t0",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "question",
+          "input_fingerprint": "ce95b56e3472931c",
+          "output": "what is x?",
+          "model_id": "source",
+          "prompt_id": "verbatim",
+          "cost": {
+            "tokens": 2,
+            "latency_ms": 0.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "classify",
+          "input_fingerprint": "6511fdd76f1482c1",
+          "output": "topic:1",
+          "model_id": "router.v1",
+          "prompt_id": "classify.v1",
+          "cost": {
+            "tokens": 1,
+            "latency_ms": 0.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "retrieve",
+          "input_fingerprint": "f99b1ebcfae55fae",
+          "output": "facts_for_topic:1",
+          "model_id": "kb.v1",
+          "prompt_id": "retrieve.v1",
+          "cost": {
+            "tokens": 4,
+            "latency_ms": 0.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "answer",
+          "input_fingerprint": "7f0edf91fdd6151b",
+          "output": "answer<facts_for_topic:1>",
+          "model_id": "writer.v1",
+          "prompt_id": "answer.v1",
+          "cost": {
+            "tokens": 6,
+            "latency_ms": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "trajectory_id": "faq-t1",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "question",
+          "input_fingerprint": "ce95b56e3472931c",
+          "output": "how does y work?",
+          "model_id": "source",
+          "prompt_id": "verbatim",
+          "cost": {
+            "tokens": 4,
+            "latency_ms": 0.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "classify",
+          "input_fingerprint": "3073cc904660c5df",
+          "output": "topic:1",
+          "model_id": "router.v1",
+          "prompt_id": "classify.v1",
+          "cost": {
+            "tokens": 1,
+            "latency_ms": 0.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "retrieve",
+          "input_fingerprint": "f99b1ebcfae55fae",
+          "output": "facts_for_topic:1",
+          "model_id": "kb.v1",
+          "prompt_id": "retrieve.v1",
+          "cost": {
+            "tokens": 4,
+            "latency_ms": 0.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "answer",
+          "input_fingerprint": "7f0edf91fdd6151b",
+          "output": "answer<facts_for_topic:1>",
+          "model_id": "writer.v1",
+          "prompt_id": "answer.v1",
+          "cost": {
+            "tokens": 6,
+            "latency_ms": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "trajectory_id": "faq-t2",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "question",
+          "input_fingerprint": "ce95b56e3472931c",
+          "output": "why z?",
+          "model_id": "source",
+          "prompt_id": "verbatim",
+          "cost": {
+            "tokens": 1,
+            "latency_ms": 0.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "classify",
+          "input_fingerprint": "5fa643bd3be0d24e",
+          "output": "topic:0",
+          "model_id": "router.v1",
+          "prompt_id": "classify.v1",
+          "cost": {
+            "tokens": 1,
+            "latency_ms": 0.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "retrieve",
+          "input_fingerprint": "d78f59cc2bc2ac28",
+          "output": "facts_for_topic:0",
+          "model_id": "kb.v1",
+          "prompt_id": "retrieve.v1",
+          "cost": {
+            "tokens": 4,
+            "latency_ms": 0.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "answer",
+          "input_fingerprint": "23f0a17ce1f528cf",
+          "output": "answer<facts_for_topic:0>",
+          "model_id": "writer.v1",
+          "prompt_id": "answer.v1",
+          "cost": {
+            "tokens": 6,
+            "latency_ms": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "trajectory_id": "faq-t3",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "question",
+          "input_fingerprint": "ce95b56e3472931c",
+          "output": "define w",
+          "model_id": "source",
+          "prompt_id": "verbatim",
+          "cost": {
+            "tokens": 2,
+            "latency_ms": 0.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "classify",
+          "input_fingerprint": "d6252764b9ccfc3e",
+          "output": "topic:2",
+          "model_id": "router.v1",
+          "prompt_id": "classify.v1",
+          "cost": {
+            "tokens": 1,
+            "latency_ms": 0.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "retrieve",
+          "input_fingerprint": "481fc8208edaf4d9",
+          "output": "facts_for_topic:2",
+          "model_id": "kb.v1",
+          "prompt_id": "retrieve.v1",
+          "cost": {
+            "tokens": 4,
+            "latency_ms": 0.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "answer",
+          "input_fingerprint": "cb4bfab6b529a6a0",
+          "output": "answer<facts_for_topic:2>",
+          "model_id": "writer.v1",
+          "prompt_id": "answer.v1",
+          "cost": {
+            "tokens": 6,
+            "latency_ms": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "trajectory_id": "faq-t4",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "question",
+          "input_fingerprint": "ce95b56e3472931c",
+          "output": "explain q",
+          "model_id": "source",
+          "prompt_id": "verbatim",
+          "cost": {
+            "tokens": 2,
+            "latency_ms": 0.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "classify",
+          "input_fingerprint": "a4b18d45726ff679",
+          "output": "topic:0",
+          "model_id": "router.v1",
+          "prompt_id": "classify.v1",
+          "cost": {
+            "tokens": 1,
+            "latency_ms": 0.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "retrieve",
+          "input_fingerprint": "d78f59cc2bc2ac28",
+          "output": "facts_for_topic:0",
+          "model_id": "kb.v1",
+          "prompt_id": "retrieve.v1",
+          "cost": {
+            "tokens": 4,
+            "latency_ms": 0.0
+          }
+        },
+        {
+          "step_index": 3,
+          "node_name": "answer",
+          "input_fingerprint": "23f0a17ce1f528cf",
+          "output": "answer<facts_for_topic:0>",
+          "model_id": "writer.v1",
+          "prompt_id": "answer.v1",
+          "cost": {
+            "tokens": 6,
+            "latency_ms": 0.0
+          }
+        }
+      ]
+    }
+  ]
+}
