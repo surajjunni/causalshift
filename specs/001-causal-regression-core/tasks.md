@@ -45,7 +45,7 @@ match the planted effect; a no-fault fixture yields "no significant regression."
 - [X] T013 [US1] Implement a pluggable quality evaluator interface + a default in `src/causalshift/evaluate/quality.py`: scores baseline vs candidate outputs identically (spec Assumptions); evaluator is injected, not hard-coded
 - [X] T014 [US1] Implement full re-execution replay in `src/causalshift/replay/full.py`: recompute every affected node via the backend (no reuse); if the backend returns `Unavailable` for an affected node, mark that trajectory's result **inconclusive** (never "safe") per contracts/recompute-backend.md
 - [X] T015 [US1] Implement the population evaluator with bootstrap CIs in `src/causalshift/evaluate/population.py`: aggregate per-trajectory quality deltas across many trajectories; `regressed` iff the CI excludes zero (research.md; FR-007, SC-005)
-- [X] T016 [US1] Assemble RegressionVerdict + reporting in `src/causalshift/report/verdict.py`: regressed/magnitude/CI, `false_negative_risk`=0 for full mode, and `measured_vs_assumed` tags on every figure (FR-012)
+- [X] T016 [US1] Assemble RegressionVerdict + reporting in `src/causalshift/report/verdict.py`: regressed/magnitude/CI, no `reuse_exposure` for full mode (nothing reused), and `measured_vs_assumed` tags on every figure (FR-012)
 - [X] T017 [US1] Wire `causalshift ingest <input.json>` and `causalshift evaluate --workflow --intervention --mode full [--json]` in `src/causalshift/cli.py` per contracts/cli.md; non-zero exit when a regression is detected
 - [X] T018 [P] [US1] Integration test in `tests/integration/test_us1_full_verdict.py`: planted-fault fixture → regressed verdict with CI; no-fault fixture → no significant regression (false-alarm within SC-005)
 
@@ -74,7 +74,7 @@ reuse, reporting the measured false-negative risk.
 - [X] T024 [US3] Implement the soundness ledger in `src/causalshift/soundness/ledger.py`: per-run `reuse_exposure` (fraction reused, an exposure measure), and the measured false-negative RATE from ReplayDecisions + ground truth for the benchmark (FR-009, SC-002)
 - [X] T025 [US3] Extend RegressionVerdict/report so any reuse surfaces `reuse_exposure` as the headline line (not mislabeled as a miss probability), per contracts/cli.md
 - [X] T026 [US3] Add `--mode selective` to `causalshift evaluate` in `src/causalshift/cli.py`
-- [X] T027 [P] [US3] Integration test in `tests/integration/test_us3_selective.py`: reuse happens only for valid out-of-affected-set steps; uncertain validity ⇒ recomputed with justification; selective verdict == full verdict on the fixture; `false_negative_risk` present and numeric
+- [X] T027 [P] [US3] Integration test in `tests/integration/test_us3_selective.py`: a node is reused only when its inputs are unchanged; uncertain validity ⇒ recomputed with justification; selective verdict == full verdict on the normal fixture; `reuse_exposure` present and numeric; the missing-edge case yields a measured false negative
 
 **Checkpoint**: the distinctive contribution works and is self-reporting its own risk.
 

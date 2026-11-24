@@ -28,7 +28,7 @@ causalshift evaluate --workflow demo --intervention benchmark/fixtures/demo_inte
 ```
 
 Expected: a verdict stating regressed/not, magnitude + CI, and (for `full`
-mode) a `false_negative_risk` of 0 — nothing was reused.
+mode) no `reuse_exposure` line — full re-execution reuses nothing.
 
 ## Scenario 2 — Attribution (P2)
 
@@ -40,15 +40,16 @@ regression.
 
 ## Scenario 3 — Selective replay + measured soundness (P3)
 
-Proves US3: same verdict, fewer calls, false-negative risk reported.
+Proves US3: same verdict, fewer calls, reuse exposure reported.
 
 ```bash
 causalshift evaluate --workflow demo --intervention benchmark/fixtures/demo_intervention.json --mode selective
 ```
 
-Expected: same regressed/not verdict as Scenario 1, a lower `calls` count, and
-a non-null measured `false_negative_risk`. Any node whose reuse validity is
-uncertain shows `action = recomputed` with a justification.
+Expected: same regressed/not verdict as Scenario 1, a lower `calls` count, and a
+`reuse_exposure` headline (fraction of nodes reused; not a miss probability).
+Any node whose reuse validity is uncertain shows `action = recomputed` with a
+justification.
 
 ## Scenario 4 — The quality gate (primary)
 
