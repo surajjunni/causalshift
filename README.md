@@ -82,6 +82,25 @@ predicate consumes, so a captured trace is immediately replayable.
   4 trajectories): both modes detect the regression; **selective 4 recompute
   calls vs full 12** (same prompt-construction for record and replay).
 
+### From a framework: LangGraph (near-zero code)
+
+Already on LangGraph? Capture a trace from a compiled graph with no node rewrites:
+
+```python
+from causalshift.adapters.langgraph import trace_from_langgraph
+
+app = graph.compile()
+trace = trace_from_langgraph(app, inputs=[{"q": q} for q in questions])
+# -> store.workflow_from_dict(trace), or dump to JSON for `causalshift ingest`
+```
+
+The graph's nodes/edges become the declared dependency DAG and `app.stream(...)`
+captures each node's output. **Caveat:** LangGraph nodes share one state object,
+so control-flow edges can under-declare true data dependencies (the missing-edge
+risk) — which `reuse_exposure` and the benchmark then measure, not hide. For
+nodes with hidden cross-state reads, add the edges or use the explicit seam.
+`examples/langgraph_agent.py` runs with no LLM. Install: `pip install "causalshift[langgraph]"`.
+
 ## How it relates to other tools (honest scope)
 
 CausalShift occupies a gap the adjacent tools state they do **not** fill:
