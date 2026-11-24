@@ -1,6 +1,16 @@
 # ReplayGate
 
-**Causal regression testing for model and prompt changes in LLM-agent pipelines.**
+[![CI](https://github.com/surajjunni/replaygate/actions/workflows/ci.yml/badge.svg)](https://github.com/surajjunni/replaygate/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](pyproject.toml)
+
+**Regression testing for LLM agents — catch prompt and model-change regressions on
+your real traffic, before you ship.** ReplayGate is a CI gate for prompt/model
+changes: it replays recorded agent trajectories, recomputes only the
+causally-affected steps (dependency-aware selective replay), and returns a
+PASS / FAIL / INCONCLUSIVE verdict with the **false-negative rate as the headline
+metric**. Works with LangGraph, MLflow, CrewAI, the OpenAI Agents SDK, and
+OpenTelemetry traces; local (Ollama) or cloud (OpenAI/Anthropic) models.
 
 > You're about to swap a model or edit a prompt behind a production agent. On
 > your *real* recorded traffic — not hand-written test cases — will quality
@@ -178,3 +188,11 @@ if slower, oracle.
 v1 scope: deterministic, explicitly instrumented **DAG-style** agents. Cyclic
 and opaque-stateful agents are rejected, not silently analyzed. See
 `.specify/memory/constitution.md` for the governing principles.
+
+---
+
+**Keywords:** LLM agent regression testing · prompt regression testing · model
+upgrade / model-swap testing for AI agents · LLM evaluation · LLMOps · agent
+observability · CI gate for prompt and model changes · counterfactual / causal
+replay · selective replay · false-negative rate · LangGraph · MLflow · CrewAI ·
+OpenAI Agents SDK · OpenTelemetry · Ollama · OpenAI · Anthropic · Python.
