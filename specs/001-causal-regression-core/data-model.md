@@ -96,7 +96,7 @@ requires `validity_checked = valid`. Any uncertain validity ⇒ `recomputed`
 ## ComparisonReport (selective vs full)
 
 - per metric: `detection_agreement`, `missed_regressions` (false-negative rate)
-  with `missed_ci_low` / `missed_ci_high` (95% bootstrap CI over labeled cases),
+  with `missed_ci_low` / `missed_ci_high` (Wilson 95% CI over labeled cases),
   `attribution_accuracy`, `reuse_exposure` (aggregate fraction of nodes reused),
   `call_count`, `token_cost`, `latency_ms`, plus `full_missed` (full
   re-execution's own miss rate vs truth — an oracle-quality check)

@@ -17,7 +17,7 @@ for p in (str(_ROOT), str(_ROOT / "src")):
         sys.path.insert(0, p)
 
 from causalshift.attribute.causal import attribute          # noqa: E402
-from causalshift.evaluate.population import bootstrap_mean_ci  # noqa: E402
+from causalshift.evaluate.population import wilson_interval  # noqa: E402
 from causalshift.evaluate.quality import TerminalSignalEvaluator  # noqa: E402
 from causalshift.soundness.ledger import reuse_fraction     # noqa: E402
 from causalshift.graph.dag import DependencyGraph           # noqa: E402
@@ -80,7 +80,9 @@ def run(corpus=None):
     agreement = sum(1 for s, f in zip(sel_reg, full_reg) if s == f) / n
     fn = sum(missed_flags) / len(missed_flags) if missed_flags else 0.0
     full_fn = sum(full_missed_flags) / len(full_missed_flags) if full_missed_flags else 0.0
-    _, m_lo, m_hi = bootstrap_mean_ci(missed_flags) if missed_flags else (0.0, 0.0, 0.0)
+    # Wilson score interval on the missed-regression PROPORTION (a rate with few
+    # events) — not a bootstrap of the mean, which is degenerate for small binary n.
+    m_lo, m_hi = wilson_interval(int(sum(missed_flags)), len(missed_flags))
     attribution_acc = attr_hits / attr_total if attr_total else 1.0
 
     return ComparisonReport(
@@ -119,7 +121,7 @@ def main(argv=None):
         print(f"  cases                 {rep.n_cases}")
         print(f"  detection_agreement   {rep.detection_agreement:.3f}")
         print(f"  missed_regressions    {rep.missed_regressions:.3f}  "
-              f"[95% CI {rep.missed_ci_low:.3f}, {rep.missed_ci_high:.3f}]  "
+              f"[Wilson 95% CI {rep.missed_ci_low:.3f}, {rep.missed_ci_high:.3f}]  "
               f"(HEADLINE false-negative RATE, vs INDEPENDENT ground truth)")
         print(f"  full_missed_vs_truth  {rep.full_missed:.3f}   "
               f"(full re-exec's own miss rate — oracle-quality check, want ~0)")

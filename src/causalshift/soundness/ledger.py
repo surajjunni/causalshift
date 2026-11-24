@@ -1,9 +1,11 @@
 """Soundness accounting (Constitution Principle I; FR-009).
 
 At evaluate time (no ground truth) we cannot KNOW whether a reuse missed a
-regression; we report the reuse fraction as a labeled UPPER BOUND on residual
-risk. The true missed-regression (false-negative) rate is measured only against
-ground truth, by the benchmark."""
+regression. `reuse_fraction` is an EXPOSURE measure — the fraction of nodes
+reused — NOT a probability or bound on the missed-regression rate: reusing more
+nodes exposes you to more risk, but the fraction itself is not that risk. The
+true missed-regression (false-negative) RATE is measured only against ground
+truth, by the benchmark (with a Wilson confidence interval)."""
 
 from __future__ import annotations
 

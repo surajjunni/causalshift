@@ -135,7 +135,7 @@ Hardening from the static code review; soundness and fair measurement.
 - [X] T047 One-command risk report: `causalshift diff` + `report/diff.py`
   (PASS/FAIL/INCONCLUSIVE + impact/CI + changed step + calls saved + exposure);
   tests in `tests/unit/test_diff_report.py`.
-- [X] T048 Benchmark reports a 95% bootstrap CI on the missed-regression rate +
+- [X] T048 Benchmark reports a Wilson 95% CI on the missed-regression rate +
   aggregate `reuse_exposure` + a dependency-completeness note
   (`benchmark/run_benchmark.py`, `ComparisonReport`).
 - [X] T049 [FR-015] Framework capture adapters: generic `adapters/spans.py`
