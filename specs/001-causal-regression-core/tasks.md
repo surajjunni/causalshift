@@ -158,6 +158,11 @@ Hardening from the static code review; soundness and fair measurement.
 - [X] T053 [FR-017] Benchmark measures the false-negative rate vs INDEPENDENT
   ground truth (not full_replay) and reports `full_missed` as an oracle-quality
   check (`benchmark/run_benchmark.py`, `ComparisonReport`).
+- [X] T054 [FR-017] Topology × hidden-edge-frequency sweep
+  (`benchmark/sweep.py`): 3 topologies (chain/deepchain/fan) × frequencies,
+  false-negative rate + 95% CI + `full_missed` per condition; multi-topology via
+  a `Topology` registry in `faults/inject.py` (evaluator targets each case's
+  terminal). Tests in `tests/integration/test_sweep.py`.
 
 ## Dependencies & Story Completion Order
 

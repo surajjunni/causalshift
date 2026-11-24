@@ -1,28 +1,27 @@
-"""Injected-fault corpus with known ground truth (data-model.md BenchmarkCase).
+"""Injected-fault corpus with known, INDEPENDENT ground truth, across multiple
+topologies and a tunable hidden-edge frequency (data-model.md BenchmarkCase).
 
-Synthetic numeric agents (no LLM). Topology per case:
+Synthetic numeric agents (no LLM). Each topology designates a per-trajectory
+`source`, a `terminal` (the quality node), a `normal_fault` (a declared ancestor
+of the terminal) and a `hidden_fault` (a node with a TRUE edge to the terminal
+that the DECLARED graph omits). Signals: source = per-trajectory input; every
+other node = base + sum(TRUE predecessors) + model delta. Ground truth
+(`regresses`) is computed from the TRUE structure at construction — independent
+of the replay engine.
 
-    root ──▶ mid ──▶ leaf        (declared chain; terminal = leaf)
-    root ──▶ side                (declared; side has no declared child)
-
-`root` is a per-trajectory source input (never recomputed, always reused).
-Signals: mid = base + root + delta(mid, model); leaf = base + mid [+ side if a
-hidden edge exists] + delta(leaf, model); side = base + root + delta(side, model).
-
-Three case kinds:
-  - normal regressing : intervene `mid`→bad model. leaf is a DECLARED descendant,
-    so selective recomputes it and agrees with full. (no false negative)
-  - missing-edge regressing : `leaf` TRULY depends on `side` (hidden edge, NOT in
-    the declared graph); intervene `side`→bad model. Selective sees `side` with no
-    declared descendants, reuses stale `leaf`, and MISSES the regression that full
-    catches. (a measured false negative)
-  - non-regressing : intervene `mid`→neutral model (delta 0). Neither detects. (agreement)
+Case kinds:
+  - normal        : fault on `normal_fault` (declared ancestor) → selective catches.
+  - missing_edge  : fault on `hidden_fault` whose edge to the terminal is UNDECLARED
+                    → selective reuses the stale terminal and MISSES it (a measured
+                    false negative); full catches it (terminal is last in topo).
+  - non_regressing: neutral model (delta 0) → neither detects.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
+import networkx as nx
 import numpy as np
 
 from causalshift.backends.fixture import FixtureBackend
@@ -31,10 +30,45 @@ from causalshift.models import (
 )
 from causalshift.replay.validity import fingerprint
 
-NODES = ["root", "mid", "side", "leaf"]
-DECLARED_EDGES = [("root", "mid"), ("mid", "leaf"), ("root", "side")]
-BASE = {"root": 0.0, "mid": 1.0, "side": 1.0, "leaf": 1.0}
-BAD_DELTA = -5.0   # a 'bad' model's drop, large enough for a clear CI
+BAD_DELTA = -5.0
+
+
+@dataclass
+class Topology:
+    name: str
+    nodes: list[str]
+    declared_edges: list[tuple]
+    source: str
+    terminal: str
+    normal_fault: str
+    hidden_fault: str
+    base: dict = field(default_factory=dict)
+
+    def base_of(self, n):
+        return self.base.get(n, 1.0)
+
+
+def _chain():
+    return Topology("chain", ["root", "mid", "side", "leaf"],
+                    [("root", "mid"), ("mid", "leaf"), ("root", "side")],
+                    source="root", terminal="leaf", normal_fault="mid", hidden_fault="side")
+
+
+def _deepchain():
+    return Topology("deepchain", ["root", "a", "b", "c", "leaf", "s"],
+                    [("root", "a"), ("a", "b"), ("b", "c"), ("c", "leaf"), ("root", "s")],
+                    source="root", terminal="leaf", normal_fault="b", hidden_fault="s")
+
+
+def _fan():
+    return Topology("fan", ["root", "router", "x", "y", "agg", "leaf", "s"],
+                    [("root", "router"), ("router", "x"), ("router", "y"),
+                     ("x", "agg"), ("y", "agg"), ("agg", "leaf"), ("root", "s")],
+                    source="root", terminal="leaf", normal_fault="agg", hidden_fault="s")
+
+
+TOPOLOGIES = [_chain(), _deepchain(), _fan()]
+DEFAULT = _chain()          # back-compat: the original root/mid/side/leaf shape
 
 
 @dataclass
@@ -46,82 +80,87 @@ class CaseSpec:
     regresses: bool
     missing_edge: bool
     backend: FixtureBackend
+    terminal: str = "leaf"
 
 
-def _declared_preds(node: str) -> list[str]:
-    return [s for s, d in DECLARED_EDGES if d == node]
+def _true_deps(topo: Topology, hidden: bool) -> dict:
+    deps = {n: [] for n in topo.nodes}
+    for s, d in topo.declared_edges:
+        deps[d].append(s)
+    if hidden:
+        deps[topo.terminal].append(topo.hidden_fault)   # the UNDECLARED true edge
+    return deps
 
 
-def _baseline_signal(node: str, roots: dict[str, float], hidden: bool) -> float:
-    # baseline = model "A", delta 0 everywhere; computed in dependency order
-    r = roots["root"]
-    if node == "root":
-        return r
-    if node == "side":
-        return BASE["side"] + r
-    if node == "mid":
-        return BASE["mid"] + r
-    if node == "leaf":
-        mid = BASE["mid"] + r
-        side = BASE["side"] + r
-        return BASE["leaf"] + mid + (side if hidden else 0.0)
-    return 0.0
+def _declared_preds(topo: Topology, node: str) -> list[str]:
+    return [s for s, d in topo.declared_edges if d == node]
 
 
-def _make_case(case_id: str, kind: str, m_trajectories: int, rng) -> CaseSpec:
+def _signals(topo: Topology, true_deps: dict, root_val: float) -> dict:
+    g = nx.DiGraph()
+    g.add_nodes_from(topo.nodes)
+    for n, ps in true_deps.items():
+        for p in ps:
+            g.add_edge(p, n)
+    sig = {}
+    for n in nx.topological_sort(g):
+        if n == topo.source:
+            sig[n] = root_val
+        else:
+            sig[n] = topo.base_of(n) + sum(sig[p] for p in true_deps[n])
+    return sig
+
+
+def _make_case(case_id: str, kind: str, m_trajectories: int, rng,
+               topo: Topology = DEFAULT) -> CaseSpec:
     hidden = kind == "missing_edge"
     if kind == "normal":
-        fault_node, bad_model, regresses = "mid", "B", True
+        fault, bad, regresses = topo.normal_fault, "B", True
     elif kind == "missing_edge":
-        fault_node, bad_model, regresses = "side", "B", True
-    else:  # non_regressing
-        fault_node, bad_model, regresses = "mid", "C", False
+        fault, bad, regresses = topo.hidden_fault, "B", True
+    else:
+        fault, bad, regresses = topo.normal_fault, "C", False
 
-    # true dependency structure (what the agent really reads)
-    true_deps = {"mid": ["root"], "side": ["root"],
-                 "leaf": ["mid"] + (["side"] if hidden else [])}
-    model_delta = {(fault_node, bad_model): (BAD_DELTA if regresses else 0.0)}
-    backend = FixtureBackend(true_deps=true_deps, base=BASE, model_delta=model_delta)
-    backend.sources = {"root"}  # consumed by FixtureBackend.recompute
+    true_deps = _true_deps(topo, hidden)
+    model_delta = {(fault, bad): (BAD_DELTA if regresses else 0.0)}
+    backend = FixtureBackend(true_deps=true_deps,
+                             base={n: topo.base_of(n) for n in topo.nodes},
+                             model_delta=model_delta, sources={topo.source})
 
     trajectories = []
     for i in range(m_trajectories):
-        roots = {"root": float(rng.normal(10.0, 1.0))}
+        root_val = float(rng.normal(10.0, 1.0))
+        sig = _signals(topo, true_deps, root_val)
         steps = []
-        current = {"root": f"{roots['root']:.6f}"}
-        for idx, node in enumerate(NODES):
-            sig = _baseline_signal(node, roots, hidden)
-            current[node] = f"{sig:.6f}"
-        for idx, node in enumerate(NODES):
-            preds = {p: current[p] for p in _declared_preds(node)}
-            fp = fingerprint(node, "A", "p0", preds)
+        for idx, node in enumerate(topo.nodes):
+            preds = {p: f"{sig[p]:.6f}" for p in _declared_preds(topo, node)}
             steps.append(Step(step_index=idx, node_name=node,
-                              input_fingerprint=fp, output=current[node],
-                              model_id="A", prompt_id="p0",
+                              input_fingerprint=fingerprint(node, "A", "p0", preds),
+                              output=f"{sig[node]:.6f}", model_id="A", prompt_id="p0",
                               cost=Cost(tokens=10, latency_ms=1.0)))
         trajectories.append(Trajectory(
             trajectory_id=f"{case_id}-t{i}", workflow_id=case_id, steps=steps,
-            ground_truth=GroundTruth(fault_node=fault_node if regresses else None,
+            ground_truth=GroundTruth(fault_node=fault if regresses else None,
                                      regresses=regresses)))
 
-    workflow = Workflow(workflow_id=case_id, nodes=list(NODES),
-                        edges=list(DECLARED_EDGES), trajectories=trajectories)
-    intervention = Intervention(workflow_id=case_id,
-                                targets={fault_node: {"model_id": bad_model}})
-    return CaseSpec(case_id, workflow, intervention, fault_node if regresses else None,
-                    regresses, hidden, backend)
+    workflow = Workflow(workflow_id=case_id, nodes=list(topo.nodes),
+                        edges=list(topo.declared_edges), trajectories=trajectories)
+    intervention = Intervention(workflow_id=case_id, targets={fault: {"model_id": bad}})
+    return CaseSpec(case_id, workflow, intervention, fault if regresses else None,
+                    regresses, hidden, backend, terminal=topo.terminal)
 
 
 def make_corpus(seed: int = 1729, n_normal: int = 30, n_missing: int = 1,
-                n_nonreg: int = 10, m_trajectories: int = 30) -> list[CaseSpec]:
+                n_nonreg: int = 10, m_trajectories: int = 30,
+                topo: Topology = DEFAULT) -> list[CaseSpec]:
     rng = np.random.default_rng(seed)
     cases: list[CaseSpec] = []
     for i in range(n_normal):
-        cases.append(_make_case(f"normal-{i}", "normal", m_trajectories, rng))
+        cases.append(_make_case(f"normal-{i}", "normal", m_trajectories, rng, topo))
     for i in range(n_missing):
-        cases.append(_make_case(f"missing-{i}", "missing_edge", m_trajectories, rng))
+        cases.append(_make_case(f"missing-{i}", "missing_edge", m_trajectories, rng, topo))
     for i in range(n_nonreg):
-        cases.append(_make_case(f"nonreg-{i}", "non_regressing", m_trajectories, rng))
+        cases.append(_make_case(f"nonreg-{i}", "non_regressing", m_trajectories, rng, topo))
     return cases
 
 

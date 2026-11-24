@@ -42,7 +42,13 @@ Exit codes gate CI directly (0 pass / 1 fail / 2 inconclusive-fails-closed). Low
 ```bash
 causalshift evaluate --workflow W --intervention change.json --mode selective --backend ollama
 causalshift benchmark                                # the injected-fault quality gate
+python benchmark/sweep.py                            # false-negatives vs topology × hidden-edge frequency
 ```
+
+The sweep makes the headline honesty visible: the false-negative rate scales
+with **hidden-edge frequency** (how complete the declared dependency graph is),
+not with the policy — measured across topologies, with CIs, against independent
+ground truth, and `full_missed ~0` confirming the oracle.
 
 **Recompute backends** (`--backend`): `none` (default), `ollama` (local),
 `openai`, `anthropic`. Cloud backends read the key from the environment

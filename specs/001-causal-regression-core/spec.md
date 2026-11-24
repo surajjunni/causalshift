@@ -165,7 +165,10 @@ negatives), attribution accuracy, model-call count, token cost, and latency.
 - **FR-017**: The benchmark MUST measure the false-negative rate against
   INDEPENDENT ground truth (derived from the true dependency graph at
   construction), not against the replay engine's own full re-execution, and MUST
-  also report full re-execution's own miss rate as an oracle-quality check.
+  also report full re-execution's own miss rate as an oracle-quality check. It
+  SHOULD provide a sweep varying topology and hidden-edge frequency, reporting
+  the false-negative rate with a confidence interval per condition, so the rate
+  is not read off a single corpus shape.
 - **FR-015**: System SHOULD provide framework capture adapters that build a
   conformant trace from an existing agent with minimal code — a generic
   span-based core (span name → node, parent → dependency edge) plus thin shims

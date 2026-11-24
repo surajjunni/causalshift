@@ -38,7 +38,6 @@ SC = {"agreement": 0.95, "false_neg": 0.05, "call_ratio": 1.0, "attribution": 0.
 
 def run(corpus=None):
     corpus = corpus or make_corpus()
-    evaluator = TerminalSignalEvaluator(target="leaf")
     sel_reg, full_reg = [], []
     attr_hits = attr_total = 0
     sc = fc = st = ft = 0
@@ -48,6 +47,8 @@ def run(corpus=None):
     all_sel_results = []
 
     for case in corpus:
+        # quality is read at this topology's designated terminal/response node
+        evaluator = TerminalSignalEvaluator(target=getattr(case, "terminal", "leaf"))
         graph = DependencyGraph(case.workflow)
         full_results, sel_results = [], []
         for t in case.workflow.trajectories:
