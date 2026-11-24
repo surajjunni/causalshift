@@ -1,0 +1,68 @@
+{
+  "workflow_id": "crewai_writer",
+  "graph": {
+    "nodes": [
+      "research",
+      "outline",
+      "write"
+    ],
+    "edges": [
+      [
+        "outline",
+        "write"
+      ],
+      [
+        "research",
+        "outline"
+      ],
+      [
+        "research",
+        "write"
+      ]
+    ]
+  },
+  "prompts": {},
+  "trajectories": [
+    {
+      "trajectory_id": "crewai_writer-t0",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "research",
+          "input_fingerprint": "e6b8cb9c6334d4a1",
+          "output": "findings: ...",
+          "model_id": "task",
+          "prompt_id": "default",
+          "cost": {
+            "tokens": 3,
+            "latency_ms": 0.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "outline",
+          "input_fingerprint": "1e79e249faaa120a",
+          "output": "outline: ...",
+          "model_id": "task",
+          "prompt_id": "default",
+          "cost": {
+            "tokens": 3,
+            "latency_ms": 0.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "write",
+          "input_fingerprint": "49be4947e8e5945f",
+          "output": "final article ...",
+          "model_id": "task",
+          "prompt_id": "default",
+          "cost": {
+            "tokens": 4,
+            "latency_ms": 0.0
+          }
+        }
+      ]
+    }
+  ]
+}

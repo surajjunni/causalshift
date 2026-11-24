@@ -122,12 +122,16 @@ nodes with hidden cross-state reads, add the edges or use the explicit seam.
 
 ### Other frameworks
 
-| Framework | How | Status |
-|---|---|---|
-| **LangGraph** | `adapters.langgraph.trace_from_langgraph(app, inputs)` | live-tested |
-| **MLflow Tracing** | `adapters.mlflow.trace_from_mlflow(traces)` (span_id/parent_id → edges) | shim over the span core; validate vs your MLflow version |
-| **CrewAI** | `adapters.crewai.trace_from_crewai(tasks, crew.kickoff())` — task `context` → edges | validate vs your CrewAI version |
-| **OpenAI Agents SDK / LlamaIndex / OpenTelemetry** | normalize their spans to `{name, parent, output}` and call `adapters.spans.trace_from_spans(traces)` | generic span core (tested) |
+| Framework | How | Runnable example | Status |
+|---|---|---|---|
+| **LangGraph** | `adapters.langgraph.trace_from_langgraph(app, inputs)` | `examples/langgraph_agent.py` | live-tested |
+| **MLflow Tracing** | `adapters.mlflow.trace_from_mlflow(traces)` (span_id/parent_id → edges) | `examples/mlflow_agent.py` | shim over the span core; validate vs your MLflow version |
+| **CrewAI** | `adapters.crewai.trace_from_crewai(tasks, crew.kickoff())` — task `context` → edges | `examples/crewai_agent.py` | validate vs your CrewAI version |
+| **OpenAI Agents SDK / LlamaIndex / OpenTelemetry** | normalize their spans to `{name, parent, output}` and call `adapters.spans.trace_from_spans(traces)` | span recipe below | generic span core (tested) |
+
+Every example runs with **no framework install** (stand-in objects that mirror
+each framework's real shape; the real call is shown in a comment) — so you can
+see the capture→trace path, then swap in your real app.
 
 Span-based recipe (covers any tracing stack):
 

@@ -1,0 +1,146 @@
+{
+  "workflow_id": "mlflow_rag",
+  "graph": {
+    "nodes": [
+      "retrieve",
+      "rerank",
+      "generate"
+    ],
+    "edges": [
+      [
+        "rerank",
+        "generate"
+      ],
+      [
+        "retrieve",
+        "rerank"
+      ]
+    ]
+  },
+  "prompts": {},
+  "trajectories": [
+    {
+      "trajectory_id": "mlflow_rag-t0",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "retrieve",
+          "input_fingerprint": "5450ec946f96e696",
+          "output": "{\"docs\": \"docs_for(what is x?)\"}",
+          "model_id": "span",
+          "prompt_id": "default",
+          "cost": {
+            "tokens": 8,
+            "latency_ms": 0.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "rerank",
+          "input_fingerprint": "be98ee9ce3ac1fc5",
+          "output": "{\"top\": \"doc#2\"}",
+          "model_id": "span",
+          "prompt_id": "default",
+          "cost": {
+            "tokens": 4,
+            "latency_ms": 0.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "generate",
+          "input_fingerprint": "8d526994f436dfce",
+          "output": "{\"answer\": \"answer(what is x?)\"}",
+          "model_id": "span",
+          "prompt_id": "default",
+          "cost": {
+            "tokens": 8,
+            "latency_ms": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "trajectory_id": "mlflow_rag-t1",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "retrieve",
+          "input_fingerprint": "5450ec946f96e696",
+          "output": "{\"docs\": \"docs_for(why y?)\"}",
+          "model_id": "span",
+          "prompt_id": "default",
+          "cost": {
+            "tokens": 7,
+            "latency_ms": 0.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "rerank",
+          "input_fingerprint": "160747ee10c0ec76",
+          "output": "{\"top\": \"doc#2\"}",
+          "model_id": "span",
+          "prompt_id": "default",
+          "cost": {
+            "tokens": 4,
+            "latency_ms": 0.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "generate",
+          "input_fingerprint": "8d526994f436dfce",
+          "output": "{\"answer\": \"answer(why y?)\"}",
+          "model_id": "span",
+          "prompt_id": "default",
+          "cost": {
+            "tokens": 7,
+            "latency_ms": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "trajectory_id": "mlflow_rag-t2",
+      "steps": [
+        {
+          "step_index": 0,
+          "node_name": "retrieve",
+          "input_fingerprint": "5450ec946f96e696",
+          "output": "{\"docs\": \"docs_for(how z?)\"}",
+          "model_id": "span",
+          "prompt_id": "default",
+          "cost": {
+            "tokens": 7,
+            "latency_ms": 0.0
+          }
+        },
+        {
+          "step_index": 1,
+          "node_name": "rerank",
+          "input_fingerprint": "f673f6afde84b109",
+          "output": "{\"top\": \"doc#2\"}",
+          "model_id": "span",
+          "prompt_id": "default",
+          "cost": {
+            "tokens": 4,
+            "latency_ms": 0.0
+          }
+        },
+        {
+          "step_index": 2,
+          "node_name": "generate",
+          "input_fingerprint": "8d526994f436dfce",
+          "output": "{\"answer\": \"answer(how z?)\"}",
+          "model_id": "span",
+          "prompt_id": "default",
+          "cost": {
+            "tokens": 7,
+            "latency_ms": 0.0
+          }
+        }
+      ]
+    }
+  ]
+}
