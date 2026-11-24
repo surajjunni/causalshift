@@ -1,7 +1,7 @@
 import pytest
 
-from causalshift.models import Cost, Step, Trajectory, Workflow
-from causalshift.store.validate import TraceInputError, validate_workflow
+from replaygate.models import Cost, Step, Trajectory, Workflow
+from replaygate.store.validate import TraceInputError, validate_workflow
 
 
 def _wf(edges, steps_fp="fp"):

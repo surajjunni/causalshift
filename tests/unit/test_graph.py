@@ -1,7 +1,7 @@
 import pytest
 
-from causalshift.graph.dag import DependencyGraph
-from causalshift.models import Workflow
+from replaygate.graph.dag import DependencyGraph
+from replaygate.models import Workflow
 
 
 def _g(edges):

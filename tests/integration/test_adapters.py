@@ -3,12 +3,12 @@ framework's documented object shape, via constructed inputs — no heavy install
 
 from types import SimpleNamespace
 
-from causalshift.adapters.crewai import trace_from_crewai
-from causalshift.adapters.mlflow import trace_from_mlflow
-from causalshift.adapters.spans import trace_from_spans
-from causalshift.graph.dag import DependencyGraph
-from causalshift.replay.validity import reusable
-from causalshift.store.db import workflow_from_dict
+from replaygate.adapters.crewai import trace_from_crewai
+from replaygate.adapters.mlflow import trace_from_mlflow
+from replaygate.adapters.spans import trace_from_spans
+from replaygate.graph.dag import DependencyGraph
+from replaygate.replay.validity import reusable
+from replaygate.store.db import workflow_from_dict
 
 
 def _assert_reusable(trace):

@@ -1,6 +1,6 @@
-"""Capture a CausalShift trace from a LangGraph app with ~2 lines of glue.
+"""Capture a ReplayGate trace from a LangGraph app with ~2 lines of glue.
 
-    pip install "causalshift[langgraph]"   # or: uv pip install langgraph
+    pip install "replaygate[langgraph]"   # or: uv pip install langgraph
     python examples/langgraph_agent.py     # -> examples/langgraph_trace.json
 
 Pure-Python nodes (no LLM) so it runs anywhere and shows the capture path.
@@ -24,7 +24,7 @@ except ImportError:
     print("install langgraph first:  uv pip install langgraph", file=sys.stderr)
     raise SystemExit(2)
 
-from causalshift.adapters.langgraph import trace_from_langgraph  # noqa: E402
+from replaygate.adapters.langgraph import trace_from_langgraph  # noqa: E402
 
 
 class State(TypedDict):

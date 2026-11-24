@@ -1,7 +1,7 @@
 """The diff risk-report formatter (offline, pure)."""
 
-from causalshift.models import RegressionVerdict
-from causalshift.report.diff import diff_report
+from replaygate.models import RegressionVerdict
+from replaygate.report.diff import diff_report
 
 
 def _v(regressed, inconclusive=0, exposure=0.75):

@@ -1,7 +1,7 @@
 """Fail-closed CI semantics: inconclusive is never a pass (review finding #1)."""
 
-from causalshift.models import RegressionVerdict
-from causalshift.report.verdict import verdict_exit_code
+from replaygate.models import RegressionVerdict
+from replaygate.report.verdict import verdict_exit_code
 
 
 def _v(regressed, inconclusive):

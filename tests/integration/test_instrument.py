@@ -1,10 +1,10 @@
 """The instrumentation seam produces a valid, replayable trace, and its
 fingerprints are the ones the validity predicate consumes (so reuse works)."""
 
-from causalshift.graph.dag import DependencyGraph
-from causalshift.instrument import InstrumentedAgent
-from causalshift.replay.validity import reusable
-from causalshift.store.db import TraceStore, workflow_from_dict
+from replaygate.graph.dag import DependencyGraph
+from replaygate.instrument import InstrumentedAgent
+from replaygate.replay.validity import reusable
+from replaygate.store.db import TraceStore, workflow_from_dict
 
 
 def _agent():

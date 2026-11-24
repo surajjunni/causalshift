@@ -23,8 +23,8 @@ uv sync        # or: pip install -e .
 Proves US1: a trustworthy regressed/not verdict with a confidence interval.
 
 ```bash
-causalshift ingest benchmark/fixtures/demo_workflow.json
-causalshift evaluate --workflow demo --intervention benchmark/fixtures/demo_intervention.json --mode full
+replaygate ingest benchmark/fixtures/demo_workflow.json
+replaygate evaluate --workflow demo --intervention benchmark/fixtures/demo_intervention.json --mode full
 ```
 
 Expected: a verdict stating regressed/not, magnitude + CI, and (for `full`
@@ -43,7 +43,7 @@ regression.
 Proves US3: same verdict, fewer calls, reuse exposure reported.
 
 ```bash
-causalshift evaluate --workflow demo --intervention benchmark/fixtures/demo_intervention.json --mode selective
+replaygate evaluate --workflow demo --intervention benchmark/fixtures/demo_intervention.json --mode selective
 ```
 
 Expected: same regressed/not verdict as Scenario 1, a lower `calls` count, and a
@@ -56,7 +56,7 @@ justification.
 Proves SC-001..005 with ground truth.
 
 ```bash
-causalshift benchmark --json
+replaygate benchmark --json
 ```
 
 Expected ComparisonReport fields, each checked against the spec targets:
@@ -73,10 +73,10 @@ against it with a live model + LLM judge.
 ```bash
 python examples/live_agent.py --evaluate             # records via the seam AND evaluates, one script
 # or, as separate CLI steps against the recorded trace:
-causalshift ingest examples/real_trace.json --db /tmp/cs_real.db
-causalshift evaluate --workflow real --intervention examples/bad_prompt.json \
+replaygate ingest examples/real_trace.json --db /tmp/cs_real.db
+replaygate evaluate --workflow real --intervention examples/bad_prompt.json \
     --db /tmp/cs_real.db --backend ollama --evaluator judge --mode selective --no-attribution
-causalshift evaluate ... --mode full --no-attribution    # same verdict, more calls
+replaygate evaluate ... --mode full --no-attribution    # same verdict, more calls
 ```
 
 The agent is instrumented with the `InstrumentedAgent` seam (declare deps once);
@@ -92,5 +92,5 @@ fully capture (raise judge `k`). An inconclusive run exits 2 — never a silent 
 ## Out-of-contract check
 
 ```bash
-causalshift ingest benchmark/fixtures/cyclic_workflow.json   # must error clearly, non-zero exit
+replaygate ingest benchmark/fixtures/cyclic_workflow.json   # must error clearly, non-zero exit
 ```

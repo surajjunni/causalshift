@@ -1,4 +1,4 @@
-"""Capture a CausalShift trace from MLflow Tracing.
+"""Capture a ReplayGate trace from MLflow Tracing.
 
 Runs with NO mlflow install: it uses stand-in span objects that mirror MLflow's
 real span shape (span_id / parent_id / name / outputs) so you can see the adapter
@@ -19,7 +19,7 @@ for p in (str(_ROOT), str(_ROOT / "src")):
     if p not in sys.path:
         sys.path.insert(0, p)
 
-from causalshift.adapters.mlflow import trace_from_mlflow  # noqa: E402
+from replaygate.adapters.mlflow import trace_from_mlflow  # noqa: E402
 
 
 def _span(span_id, parent_id, name, outputs):

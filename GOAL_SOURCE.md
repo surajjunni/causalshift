@@ -1,4 +1,4 @@
-# CausalShift — goal & charter
+# ReplayGate — goal & charter
 
 **Causal regression testing for model and prompt changes in LLM-agent pipelines.**
 
@@ -8,7 +8,7 @@
 
 ## Why this, and not another replay/attribution framework
 
-The adjacent work is already strong, so CausalShift is scoped against it, not
+The adjacent work is already strong, so ReplayGate is scoped against it, not
 over it:
 
 | | Question it answers |
@@ -16,7 +16,7 @@ over it:
 | CAR (arXiv 2606.08275), CausalFlow (arXiv 2605.25338) | *Within one run, which step caused this failure?* |
 | Tracely, the `agent-replay` repos | *Did orchestration break?* (replays recorded model outputs, so a model change is invisible) |
 | DeepEval, promptfoo | *Did quality change?* — on hand-written test cases, not real traffic |
-| **CausalShift** | ***If I swap model/prompt, will my agents regress on real traffic, which decision is responsible, and can I decide cheaply?*** |
+| **ReplayGate** | ***If I swap model/prompt, will my agents regress on real traffic, which decision is responsible, and can I decide cheaply?*** |
 
 **Non-goal:** competing with CAR or CausalFlow on general-purpose single-run
 causal attribution. We borrow their intervention/attribution machinery and
@@ -27,7 +27,7 @@ point it at the deployment question.
 **Dependency-aware selective counterfactual replay.**
 
 Full re-execution (CAR-style) reruns the whole trajectory forward after an
-intervention. CausalShift instead builds a **dependency graph** over agent
+intervention. ReplayGate instead builds a **dependency graph** over agent
 decisions and **reuses a recorded step's output only when its relevant inputs
 and environmental assumptions are still valid**; it recomputes only the
 causally-affected nodes. This is the fix for the weak assumption in the current

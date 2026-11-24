@@ -1,10 +1,10 @@
 """Instrument a real (here, pure-Python, deterministic) agent with the
-InstrumentedAgent seam and emit a CausalShift trace — no LLM needed, so it runs
+InstrumentedAgent seam and emit a ReplayGate trace — no LLM needed, so it runs
 anywhere and shows exactly what instrumentation a user must add: declare each
 node's deps once; inputs/outputs/fingerprints are captured automatically.
 
     python examples/instrumented_agent.py
-    causalshift ingest examples/instrumented_trace.json --db /tmp/cs_instr.db
+    replaygate ingest examples/instrumented_trace.json --db /tmp/cs_instr.db
 """
 
 from __future__ import annotations
@@ -17,7 +17,7 @@ for p in (str(_ROOT), str(_ROOT / "src")):
     if p not in sys.path:
         sys.path.insert(0, p)
 
-from causalshift.instrument import InstrumentedAgent  # noqa: E402
+from replaygate.instrument import InstrumentedAgent  # noqa: E402
 
 agent = InstrumentedAgent("faq")
 

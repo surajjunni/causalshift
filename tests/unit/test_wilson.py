@@ -1,6 +1,6 @@
 """Wilson score interval for the missed-regression rate (review #3)."""
 
-from causalshift.evaluate.population import wilson_interval
+from replaygate.evaluate.population import wilson_interval
 
 
 def test_empty_is_zero():

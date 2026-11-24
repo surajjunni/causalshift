@@ -1,6 +1,6 @@
 # Contract: Instrumented Trajectory Input
 
-The input a user supplies to CausalShift. This is a **contract**, not an
+The input a user supplies to ReplayGate. This is a **contract**, not an
 implementation — any producer (an instrumentation seam, an adapter from another
 trace format) must satisfy it. See [data-model.md](../data-model.md) for entity
 semantics.

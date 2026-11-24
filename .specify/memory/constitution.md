@@ -1,6 +1,6 @@
-# CausalShift Constitution
+# ReplayGate Constitution
 
-CausalShift is an open-source tool for **causal regression testing of model and prompt
+ReplayGate is an open-source tool for **causal regression testing of model and prompt
 changes in LLM-agent pipelines**: given a proposed change (model A → B, or a prompt edit),
 it replays recorded production trajectories, recomputes only the causally-affected steps,
 and reports whether agents regress, which decision is responsible, and with what confidence.
@@ -45,7 +45,7 @@ not by what is aspired to.
 
 ### V. Complementary & Honest Positioning
 
-CausalShift MUST be positioned honestly against adjacent work (CAR, CausalFlow, Tracely,
+ReplayGate MUST be positioned honestly against adjacent work (CAR, CausalFlow, Tracely,
 DeepEval) and MUST NOT overstate novelty. Its defensible contribution is the **deployment-decision
 question** (is change B safe on real traffic, and which step breaks) plus the **efficiency result**
 (dependency-aware selective replay vs full re-execution), delivered as a usable tool. Explicit
@@ -77,7 +77,7 @@ non-goal: competing with CAR or CausalFlow on general-purpose single-run causal 
 
 ## Governance
 
-This constitution supersedes other practices for CausalShift. Amendments MUST be documented in the
+This constitution supersedes other practices for ReplayGate. Amendments MUST be documented in the
 Sync Impact Report, versioned per semantic versioning (MAJOR: principle removal/redefinition;
 MINOR: new principle/section or materially expanded guidance; PATCH: clarifications), and dated.
 All substantial changes (PRs) MUST verify compliance with these principles — in particular that no

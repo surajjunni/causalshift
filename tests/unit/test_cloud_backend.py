@@ -2,9 +2,9 @@
 
 import json
 
-import causalshift.backends.cloud as cloud
-from causalshift.backends.base import Produced, Unavailable
-from causalshift.backends.cloud import AnthropicBackend, OpenAIBackend
+import replaygate.backends.cloud as cloud
+from replaygate.backends.base import Produced, Unavailable
+from replaygate.backends.cloud import AnthropicBackend, OpenAIBackend
 
 
 class _Resp:

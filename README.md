@@ -1,4 +1,4 @@
-# CausalShift
+# ReplayGate
 
 **Causal regression testing for model and prompt changes in LLM-agent pipelines.**
 
@@ -6,7 +6,7 @@
 > your *real* recorded traffic — not hand-written test cases — will quality
 > regress, which step is responsible, and can you find out cheaply?
 
-CausalShift replays recorded agent trajectories under a proposed change,
+ReplayGate replays recorded agent trajectories under a proposed change,
 recomputes only the **causally-affected** nodes (reusing recorded outputs
 elsewhere *only when provably valid*), and reports: did quality regress
 (with a confidence interval), which decision caused it, and the **measured
@@ -23,12 +23,12 @@ uv venv && uv pip install -e ".[dev]"   # or: pip install -e ".[dev]"
 **Is this change safe? (one command)** — the front door:
 
 ```bash
-causalshift ingest trajectories.json                 # validate + load (rejects cyclic/out-of-contract)
-causalshift diff --workflow W --intervention change.json --backend ollama --evaluator judge
+replaygate ingest trajectories.json                 # validate + load (rejects cyclic/out-of-contract)
+replaygate diff --workflow W --intervention change.json --backend ollama --evaluator judge
 ```
 
 ```text
-CausalShift — change risk report [W]
+ReplayGate — change risk report [W]
   verdict:      FAIL — quality regresses
   impact:       -0.675 mean quality (95% CI [-0.850, -0.500])
   changed step: responder
@@ -40,8 +40,8 @@ CausalShift — change risk report [W]
 Exit codes gate CI directly (0 pass / 1 fail / 2 inconclusive-fails-closed). Lower-level commands:
 
 ```bash
-causalshift evaluate --workflow W --intervention change.json --mode selective --backend ollama
-causalshift benchmark                                # the injected-fault quality gate
+replaygate evaluate --workflow W --intervention change.json --mode selective --backend ollama
+replaygate benchmark                                # the injected-fault quality gate
 python benchmark/sweep.py                            # false-negatives vs topology × hidden-edge frequency
 ```
 
@@ -59,8 +59,8 @@ offline-tested (fallback + parsing) but not yet exercised against the live APIs;
 validate against your account.
 
 ```bash
-export OPENAI_API_KEY=...   # your shell, not CausalShift
-causalshift diff --workflow W --intervention change.json --backend openai --evaluator judge
+export OPENAI_API_KEY=...   # your shell, not ReplayGate
+replaygate diff --workflow W --intervention change.json --backend openai --evaluator judge
 ```
 
 See `specs/001-causal-regression-core/quickstart.md` for runnable scenarios and
@@ -73,7 +73,7 @@ small: **declare each node's dependencies once**, and inputs, outputs and
 fingerprints are captured automatically.
 
 ```python
-from causalshift.instrument import InstrumentedAgent
+from replaygate.instrument import InstrumentedAgent
 
 agent = InstrumentedAgent("support")
 
@@ -88,7 +88,7 @@ for i, q in enumerate(questions):
         run.set("question", q)   # a source input
         run.run_all()            # runs nodes in dependency order, capturing each
 
-agent.save("trace.json")         # ready for `causalshift ingest`
+agent.save("trace.json")         # ready for `replaygate ingest`
 ```
 
 Declared `deps=` are the dependency edges — the honest level of instrumentation
@@ -106,11 +106,11 @@ predicate consumes, so a captured trace is immediately replayable.
 Already on LangGraph? Capture a trace from a compiled graph with no node rewrites:
 
 ```python
-from causalshift.adapters.langgraph import trace_from_langgraph
+from replaygate.adapters.langgraph import trace_from_langgraph
 
 app = graph.compile()
 trace = trace_from_langgraph(app, inputs=[{"q": q} for q in questions])
-# -> store.workflow_from_dict(trace), or dump to JSON for `causalshift ingest`
+# -> store.workflow_from_dict(trace), or dump to JSON for `replaygate ingest`
 ```
 
 The graph's nodes/edges become the declared dependency DAG and `app.stream(...)`
@@ -118,7 +118,7 @@ captures each node's output. **Caveat:** LangGraph nodes share one state object,
 so control-flow edges can under-declare true data dependencies (the missing-edge
 risk) — which `reuse_exposure` and the benchmark then measure, not hide. For
 nodes with hidden cross-state reads, add the edges or use the explicit seam.
-`examples/langgraph_agent.py` runs with no LLM. Install: `pip install "causalshift[langgraph]"`.
+`examples/langgraph_agent.py` runs with no LLM. Install: `pip install "replaygate[langgraph]"`.
 
 ### Other frameworks
 
@@ -136,7 +136,7 @@ see the capture→trace path, then swap in your real app.
 Span-based recipe (covers any tracing stack):
 
 ```python
-from causalshift.adapters.spans import trace_from_spans
+from replaygate.adapters.spans import trace_from_spans
 # each trajectory = a list of spans; span = {"name", "parent": <parent node name|None>, "output"}
 trace = trace_from_spans([[{"name": "retrieve", "parent": None, "output": docs},
                            {"name": "answer", "parent": "retrieve", "output": ans}]])
@@ -150,16 +150,16 @@ version (and open an issue if a field moved).
 
 ## How it relates to other tools (honest scope)
 
-CausalShift occupies a gap the adjacent tools state they do **not** fill:
+ReplayGate occupies a gap the adjacent tools state they do **not** fill:
 
 - **Tracely and the `agent-replay` family** replay *recorded* model outputs to
   catch orchestration regressions. By design they cannot test a **model/prompt
   change** (the recorded output is invalid once the model changes); they point
-  you to live experiments for that. CausalShift *is* that live-but-cheap path.
+  you to live experiments for that. ReplayGate *is* that live-but-cheap path.
 - **DeepEval / promptfoo** compare models/prompts, but on **hand-written test
-  cases**. CausalShift uses your **real recorded traffic** instead.
+  cases**. ReplayGate uses your **real recorded traffic** instead.
 - **CAR (arXiv 2606.08275) and CausalFlow (arXiv 2605.25338)** attribute *which
-  step caused a single run's failure*. CausalShift is **not** competing with
+  step caused a single run's failure*. ReplayGate is **not** competing with
   them on general single-run attribution — it answers the **deployment**
   question (is change B safe across a population) and contributes
   **dependency-aware selective replay** (fewer model calls than full
@@ -169,8 +169,8 @@ CausalShift occupies a gap the adjacent tools state they do **not** fill:
 
 Reuse is only as sound as the declared dependency graph. If a true dependency
 is undeclared (a *missing edge*), selective replay can reuse a stale output and
-**miss a regression**. CausalShift does not hide this: the false-negative rate
-is the headline metric, measured against ground truth by `causalshift
+**miss a regression**. ReplayGate does not hide this: the false-negative rate
+is the headline metric, measured against ground truth by `replaygate
 benchmark`, and the engine fails toward recompute whenever validity is
 uncertain. Full re-execution (`--mode full`) is always available as the sound,
 if slower, oracle.

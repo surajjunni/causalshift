@@ -2,12 +2,12 @@
 
 import numpy as np
 
-from causalshift.backends.base import Produced, UnavailableBackend
-from causalshift.evaluate.quality import TerminalSignalEvaluator
-from causalshift.graph.dag import DependencyGraph
-from causalshift.models import Cost, RECOMPUTED
-from causalshift.replay.engine import full_replay, selective_replay
-from causalshift.report.verdict import build_verdict, verdict_exit_code
+from replaygate.backends.base import Produced, UnavailableBackend
+from replaygate.evaluate.quality import TerminalSignalEvaluator
+from replaygate.graph.dag import DependencyGraph
+from replaygate.models import Cost, RECOMPUTED
+from replaygate.replay.engine import full_replay, selective_replay
+from replaygate.report.verdict import build_verdict, verdict_exit_code
 from benchmark.faults.inject import _make_case
 
 EVAL = TerminalSignalEvaluator(target="leaf")

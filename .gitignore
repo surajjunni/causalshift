@@ -9,7 +9,7 @@ build/
 .pytest_cache/
 .ruff_cache/
 
-# CausalShift local stores / outputs
+# ReplayGate local stores / outputs
 *.db
 benchmark/out/
 

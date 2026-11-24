@@ -2,7 +2,7 @@
 
 Entities derived from the spec's Key Entities and Functional Requirements.
 Attributes are described by role, not storage type; the SQLite schema realizes
-them in `src/causalshift/store/`.
+them in `src/replaygate/store/`.
 
 ## Trajectory
 

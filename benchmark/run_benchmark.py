@@ -16,15 +16,15 @@ for p in (str(_ROOT), str(_ROOT / "src")):
     if p not in sys.path:
         sys.path.insert(0, p)
 
-from causalshift.attribute.causal import attribute          # noqa: E402
-from causalshift.evaluate.population import wilson_interval  # noqa: E402
-from causalshift.evaluate.quality import TerminalSignalEvaluator  # noqa: E402
-from causalshift.soundness.ledger import reuse_fraction     # noqa: E402
-from causalshift.graph.dag import DependencyGraph           # noqa: E402
-from causalshift.models import ComparisonReport             # noqa: E402
-from causalshift.replay.engine import full_replay, selective_replay  # noqa: E402
-from causalshift.report.verdict import build_verdict        # noqa: E402
-from causalshift.soundness.ledger import false_negative_rate  # noqa: E402
+from replaygate.attribute.causal import attribute          # noqa: E402
+from replaygate.evaluate.population import wilson_interval  # noqa: E402
+from replaygate.evaluate.quality import TerminalSignalEvaluator  # noqa: E402
+from replaygate.soundness.ledger import reuse_fraction     # noqa: E402
+from replaygate.graph.dag import DependencyGraph           # noqa: E402
+from replaygate.models import ComparisonReport             # noqa: E402
+from replaygate.replay.engine import full_replay, selective_replay  # noqa: E402
+from replaygate.report.verdict import build_verdict        # noqa: E402
+from replaygate.soundness.ledger import false_negative_rate  # noqa: E402
 from benchmark.faults.inject import make_corpus             # noqa: E402
 
 # SC targets (spec Success Criteria)
@@ -116,7 +116,7 @@ def main(argv=None):
     if as_json:
         print(json.dumps(rep.__dict__ | {"call_ratio": rep.call_ratio}, indent=2))
     else:
-        print("CausalShift benchmark — selective vs full (measured, ground truth)")
+        print("ReplayGate benchmark — selective vs full (measured, ground truth)")
         print("=" * 64)
         print(f"  cases                 {rep.n_cases}")
         print(f"  detection_agreement   {rep.detection_agreement:.3f}")

@@ -2,9 +2,9 @@
 
 import numpy as np
 
-from causalshift.attribute.causal import attribute
-from causalshift.evaluate.quality import TerminalSignalEvaluator
-from causalshift.graph.dag import DependencyGraph
+from replaygate.attribute.causal import attribute
+from replaygate.evaluate.quality import TerminalSignalEvaluator
+from replaygate.graph.dag import DependencyGraph
 from benchmark.faults.inject import _make_case
 
 EVAL = TerminalSignalEvaluator(target="leaf")

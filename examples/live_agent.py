@@ -19,9 +19,9 @@ for p in (str(_ROOT), str(_ROOT / "src")):
     if p not in sys.path:
         sys.path.insert(0, p)
 
-from causalshift.backends.base import Produced                    # noqa: E402
-from causalshift.backends.ollama import OllamaBackend, ollama_available  # noqa: E402
-from causalshift.instrument import InstrumentedAgent              # noqa: E402
+from replaygate.backends.base import Produced                    # noqa: E402
+from replaygate.backends.ollama import OllamaBackend, ollama_available  # noqa: E402
+from replaygate.instrument import InstrumentedAgent              # noqa: E402
 
 MODEL = "llama3:latest"
 REG = {
@@ -61,13 +61,13 @@ def record(agent, rec_backend):
 
 
 def evaluate(agent):
-    from causalshift.evaluate.judge import OllamaJudge
-    from causalshift.graph.dag import DependencyGraph
-    from causalshift.models import Intervention
-    from causalshift.replay.engine import full_replay, selective_replay
-    from causalshift.report.verdict import build_verdict, format_verdict
+    from replaygate.evaluate.judge import OllamaJudge
+    from replaygate.graph.dag import DependencyGraph
+    from replaygate.models import Intervention
+    from replaygate.replay.engine import full_replay, selective_replay
+    from replaygate.report.verdict import build_verdict, format_verdict
 
-    wf = __import__("causalshift.store.db", fromlist=["workflow_from_dict"]) \
+    wf = __import__("replaygate.store.db", fromlist=["workflow_from_dict"]) \
         .workflow_from_dict(agent.to_trace_dict())
     graph = DependencyGraph(wf)
     intervention = Intervention("real", {"responder": {"prompt_id": "respond.bad"}})

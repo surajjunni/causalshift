@@ -1,4 +1,4 @@
-"""Capture a CausalShift trace from CrewAI.
+"""Capture a ReplayGate trace from CrewAI.
 
 Runs with NO crewai install: it uses stand-in Task / CrewOutput objects that
 mirror CrewAI's real shape (Task.name, Task.context, CrewOutput.tasks_output[].raw)
@@ -21,7 +21,7 @@ for p in (str(_ROOT), str(_ROOT / "src")):
     if p not in sys.path:
         sys.path.insert(0, p)
 
-from causalshift.adapters.crewai import trace_from_crewai  # noqa: E402
+from replaygate.adapters.crewai import trace_from_crewai  # noqa: E402
 
 
 def main() -> int:

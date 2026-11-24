@@ -1,7 +1,7 @@
 """P0: insufficient statistical evidence must fail closed (never a silent PASS)."""
 
-from causalshift.models import ReplayResult
-from causalshift.report.verdict import build_verdict, verdict_exit_code
+from replaygate.models import ReplayResult
+from replaygate.report.verdict import build_verdict, verdict_exit_code
 
 
 def _r(delta, inconclusive=False):

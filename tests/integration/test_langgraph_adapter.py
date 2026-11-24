@@ -1,4 +1,4 @@
-"""The LangGraph adapter captures a valid, replayable CausalShift trace."""
+"""The LangGraph adapter captures a valid, replayable ReplayGate trace."""
 
 import pytest
 
@@ -8,10 +8,10 @@ from typing import TypedDict  # noqa: E402
 
 from langgraph.graph import START, END, StateGraph  # noqa: E402
 
-from causalshift.adapters.langgraph import trace_from_langgraph  # noqa: E402
-from causalshift.graph.dag import DependencyGraph  # noqa: E402
-from causalshift.replay.validity import reusable  # noqa: E402
-from causalshift.store.db import TraceStore, workflow_from_dict  # noqa: E402
+from replaygate.adapters.langgraph import trace_from_langgraph  # noqa: E402
+from replaygate.graph.dag import DependencyGraph  # noqa: E402
+from replaygate.replay.validity import reusable  # noqa: E402
+from replaygate.store.db import TraceStore, workflow_from_dict  # noqa: E402
 
 
 class _S(TypedDict):

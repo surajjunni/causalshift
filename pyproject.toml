@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "causalshift"
+name = "replaygate"
 version = "0.1.0"
 description = "Causal regression testing for model/prompt changes in LLM-agent pipelines"
 readme = "README.md"
@@ -18,7 +18,7 @@ langgraph = ["langgraph>=0.2"]
 dev = ["pytest>=8.0", "langgraph>=0.2"]
 
 [project.scripts]
-causalshift = "causalshift.cli:main"
+replaygate = "replaygate.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

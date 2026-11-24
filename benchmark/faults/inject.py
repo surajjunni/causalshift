@@ -24,11 +24,11 @@ from dataclasses import dataclass, field
 import networkx as nx
 import numpy as np
 
-from causalshift.backends.fixture import FixtureBackend
-from causalshift.models import (
+from replaygate.backends.fixture import FixtureBackend
+from replaygate.models import (
     Cost, GroundTruth, Intervention, Step, Trajectory, Workflow,
 )
-from causalshift.replay.validity import fingerprint
+from replaygate.replay.validity import fingerprint
 
 BAD_DELTA = -5.0
 

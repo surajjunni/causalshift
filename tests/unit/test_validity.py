@@ -1,6 +1,6 @@
-from causalshift.graph.dag import DependencyGraph
-from causalshift.models import Workflow
-from causalshift.replay.validity import fingerprint, reusable
+from replaygate.graph.dag import DependencyGraph
+from replaygate.models import Workflow
+from replaygate.replay.validity import fingerprint, reusable
 
 WF = Workflow("w", ["root", "mid", "leaf"], [("root", "mid"), ("mid", "leaf")])
 G = DependencyGraph(WF)

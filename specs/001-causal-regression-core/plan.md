@@ -7,7 +7,7 @@
 ## Summary
 
 Given recorded, instrumented DAG-style agent trajectories and a proposed
-model/prompt change, CausalShift produces a population-level regression verdict
+model/prompt change, ReplayGate produces a population-level regression verdict
 (regressed? magnitude + confidence interval), attributes it to the responsible
 node(s), and does so via **dependency-aware selective replay** that recomputes
 only causally-affected nodes and reuses recorded outputs only when provably
@@ -80,7 +80,7 @@ specs/001-causal-regression-core/
 ### Source Code (repository root)
 
 ```text
-src/causalshift/
+src/replaygate/
 ├── store/          # SQLite trace store: ingest instrumented trajectories, schema
 ├── graph/          # dependency-DAG model over steps; causal-closure (affected set)
 ├── intervene/      # intervention engine: substitute model/prompt at named nodes
@@ -103,7 +103,7 @@ tests/
 └── integration/
 ```
 
-**Structure Decision**: Single pip-installable Python package `causalshift`
+**Structure Decision**: Single pip-installable Python package `replaygate`
 (library + `cli.py` entry point), with `benchmark/` and `tests/` at repo root.
 The module boundaries mirror the ten architecture components in the spec, with
 soundness isolated in its own module so the false-negative accounting is never

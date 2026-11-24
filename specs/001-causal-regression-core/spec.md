@@ -6,14 +6,14 @@
 
 **Status**: Draft
 
-**Input**: User description: "CausalShift core — causal regression testing for a model/prompt change against recorded LLM-agent trajectories."
+**Input**: User description: "ReplayGate core — causal regression testing for a model/prompt change against recorded LLM-agent trajectories."
 
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Trustworthy go/no-go verdict for a change (Priority: P1)
 
 An engineer is about to swap the model (or edit a prompt) behind a production
-LLM agent. Before shipping, they point CausalShift at a set of recorded real
+LLM agent. Before shipping, they point ReplayGate at a set of recorded real
 trajectories and the proposed change. They get back a population-level verdict:
 *did quality regress, by how much, and how confident is that answer* — not from
 hand-written test cases, but from their own recorded traffic.
@@ -42,7 +42,7 @@ interval match the planted effect across many trajectories.
 ### User Story 2 - Localize the responsible decision (Priority: P2)
 
 When a regression is found, the engineer needs to know *which* step caused it —
-was it the reasoning step, the tool selection, the retrieval? CausalShift
+was it the reasoning step, the tool selection, the retrieval? ReplayGate
 attributes the regression to the responsible node(s) so they can act.
 
 **Why this priority**: "Something got worse" is far less useful than "the
@@ -66,7 +66,7 @@ accuracy.
 ### User Story 3 - Same verdict, far cheaper, with measured soundness (Priority: P3)
 
 The engineer wants the verdict without paying to re-run every step of every
-trajectory. CausalShift recomputes only the causally-affected nodes and reuses
+trajectory. ReplayGate recomputes only the causally-affected nodes and reuses
 recorded outputs elsewhere — but only where that reuse is provably sound — and
 reports the measured risk that reuse caused a missed regression.
 
