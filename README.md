@@ -20,8 +20,26 @@ uv venv && uv pip install -e ".[dev]"   # or: pip install -e ".[dev]"
 
 ## Use
 
+**Is this change safe? (one command)** — the front door:
+
 ```bash
 causalshift ingest trajectories.json                 # validate + load (rejects cyclic/out-of-contract)
+causalshift diff --workflow W --intervention change.json --backend ollama --evaluator judge
+```
+
+```text
+CausalShift — change risk report [W]
+  verdict:      FAIL — quality regresses
+  impact:       -0.675 mean quality (95% CI [-0.850, -0.500])
+  changed step: responder
+  cost:         selective made 4 model call(s); full re-execution ≈ 12 (saved ~8, 67%)
+  reuse:        exposure 0.75 (fraction of nodes reused) — an exposure measure, not a miss probability
+  exit:         1  (0 PASS / 1 FAIL / 2 INCONCLUSIVE)
+```
+
+Exit codes gate CI directly (0 pass / 1 fail / 2 inconclusive-fails-closed). Lower-level commands:
+
+```bash
 causalshift evaluate --workflow W --intervention change.json --mode selective --backend ollama
 causalshift benchmark                                # the injected-fault quality gate
 ```

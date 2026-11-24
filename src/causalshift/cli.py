@@ -14,6 +14,7 @@ from causalshift.graph.dag import DependencyGraph
 from causalshift.intervene.apply import validate_intervention
 from causalshift.models import Intervention
 from causalshift.replay.engine import full_replay, selective_replay
+from causalshift.report.diff import diff_report
 from causalshift.report.verdict import build_verdict, format_verdict, verdict_exit_code
 from causalshift.store.db import TraceStore, load_workflow
 from causalshift.store.validate import TraceInputError
@@ -81,6 +82,38 @@ def _cmd_evaluate(args) -> int:
     return verdict_exit_code(verdict)
 
 
+def _cmd_diff(args) -> int:
+    """One-command 'is this change safe?' report (selective mode)."""
+    wf = TraceStore(args.db).hydrate(args.workflow)
+    if not wf.nodes:
+        print(f"workflow {args.workflow!r} not found in {args.db}", file=sys.stderr)
+        return 2
+    with open(args.intervention) as f:
+        spec = json.load(f)
+    intervention = Intervention(workflow_id=wf.workflow_id, targets=spec["targets"])
+    graph = DependencyGraph(wf)
+    validate_intervention(intervention, graph)
+    prompts = dict(wf.prompts)
+    prompts.update(spec.get("prompts", {}))
+    backend = _backend(args.backend, prompts, args.model, args.max_recompute)
+    evaluator = _evaluator(args.evaluator, args.judge_model)
+
+    results = [selective_replay(t, graph, intervention, backend, evaluator)
+               for t in wf.trajectories]
+    verdict = build_verdict(wf.workflow_id, "selective", results)
+    selective_calls = sum(r.calls for r in results)
+    # Fair full-baseline estimate: every non-source node recomputes once per trajectory.
+    full_estimate = sum(1 for t in wf.trajectories for s in t.steps
+                        if graph.predecessors(s.node_name))
+    if args.json:
+        print(json.dumps(verdict.__dict__ | {
+            "selective_calls": selective_calls, "full_estimate": full_estimate,
+            "targets": list(intervention.targets)}, indent=2, default=list))
+    else:
+        print(diff_report(verdict, list(intervention.targets), selective_calls, full_estimate))
+    return verdict_exit_code(verdict)
+
+
 def _cmd_benchmark(args) -> int:
     root = Path.cwd()
     if str(root) not in sys.path:
@@ -118,6 +151,18 @@ def build_parser() -> argparse.ArgumentParser:
                       help="skip attribution (cheaper; US2 off)")
     p_ev.add_argument("--json", action="store_true")
     p_ev.set_defaults(func=_cmd_evaluate)
+
+    p_df = sub.add_parser("diff", help="one-command 'is this change safe?' risk report")
+    p_df.add_argument("--workflow", required=True)
+    p_df.add_argument("--intervention", required=True)
+    p_df.add_argument("--db", default=DEFAULT_DB)
+    p_df.add_argument("--backend", choices=["none", "ollama"], default="none")
+    p_df.add_argument("--evaluator", choices=["signal", "judge"], default="signal")
+    p_df.add_argument("--model", default="llama3:latest")
+    p_df.add_argument("--judge-model", default="llama3:latest")
+    p_df.add_argument("--max-recompute", type=int, default=None)
+    p_df.add_argument("--json", action="store_true")
+    p_df.set_defaults(func=_cmd_diff)
 
     p_bn = sub.add_parser("benchmark", help="run the injected-fault gate (selective vs full)")
     p_bn.add_argument("--json", action="store_true")
