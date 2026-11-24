@@ -44,6 +44,19 @@ causalshift evaluate --workflow W --intervention change.json --mode selective --
 causalshift benchmark                                # the injected-fault quality gate
 ```
 
+**Recompute backends** (`--backend`): `none` (default), `ollama` (local),
+`openai`, `anthropic`. Cloud backends read the key from the environment
+(`OPENAI_API_KEY` / `ANTHROPIC_API_KEY`) — never passed on the command line or
+logged — and **fail closed**: with no key (or any API error) the affected nodes
+are inconclusive and the run exits 2, never a silent pass. Cloud backends are
+offline-tested (fallback + parsing) but not yet exercised against the live APIs;
+validate against your account.
+
+```bash
+export OPENAI_API_KEY=...   # your shell, not CausalShift
+causalshift diff --workflow W --intervention change.json --backend openai --evaluator judge
+```
+
 See `specs/001-causal-regression-core/quickstart.md` for runnable scenarios and
 `specs/001-causal-regression-core/contracts/` for the input/backend/CLI contracts.
 

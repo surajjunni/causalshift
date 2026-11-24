@@ -29,6 +29,11 @@ def _backend(name: str, prompts: dict, model: str, max_calls):
             print("  [warn] Ollama not reachable; affected nodes will be inconclusive",
                   file=sys.stderr)
         return OllamaBackend(model=model, prompts=prompts, max_calls=max_calls)
+    if name in ("openai", "anthropic"):
+        from causalshift.backends.cloud import make_cloud_backend
+        # if --model wasn't overridden from the ollama default, use the provider default
+        m = None if model == "llama3:latest" else model
+        return make_cloud_backend(name, model=m, prompts=prompts, max_calls=max_calls)
     return UnavailableBackend()
 
 
@@ -141,7 +146,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_ev.add_argument("--intervention", required=True)
     p_ev.add_argument("--db", default=DEFAULT_DB)
     p_ev.add_argument("--mode", choices=["full", "selective"], default="full")
-    p_ev.add_argument("--backend", choices=["none", "ollama"], default="none")
+    p_ev.add_argument("--backend", choices=["none", "ollama", "openai", "anthropic"], default="none")
     p_ev.add_argument("--evaluator", choices=["signal", "judge"], default="signal")
     p_ev.add_argument("--model", default="llama3:latest", help="recompute model (ollama)")
     p_ev.add_argument("--judge-model", default="llama3:latest")
@@ -156,7 +161,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_df.add_argument("--workflow", required=True)
     p_df.add_argument("--intervention", required=True)
     p_df.add_argument("--db", default=DEFAULT_DB)
-    p_df.add_argument("--backend", choices=["none", "ollama"], default="none")
+    p_df.add_argument("--backend", choices=["none", "ollama", "openai", "anthropic"], default="none")
     p_df.add_argument("--evaluator", choices=["signal", "judge"], default="signal")
     p_df.add_argument("--model", default="llama3:latest")
     p_df.add_argument("--judge-model", default="llama3:latest")
