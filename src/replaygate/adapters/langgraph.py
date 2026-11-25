@@ -24,19 +24,34 @@ Why per-node ids matter: recompute looks a node's `prompt_id` up in the trace's
 `prompts` map to rebuild what to run. If every node shares one id with no text
 (the bare-minimum default), only the *intervened* node can be recomputed from a
 supplied prompt — recomputing *downstream* nodes has no prompt to use. Pass
-`node_prompts` + `prompts` (and `node_models`) so the whole affected subgraph is
-recomputable.
+`node_prompts` + `prompts` (and `node_models`) so the affected subgraph is
+recompute-READY.
+
+SCOPE (what this does and does NOT do):
+- It captures metadata (graph, per-node ids, prompts, fingerprints) so the trace
+  ingests and a change can be *gated*. It does NOT guarantee that recomputation
+  reproduces the original node's execution.
+- A captured node's recorded output is whatever the node actually produced; the
+  recompute backend (e.g. Ollama) re-runs an LLM from the prompt + predecessor
+  outputs. If the original node was not that same LLM call (a Python function, a
+  tool call, hidden state), the recomputed output will differ for reasons that
+  are NOT a model/prompt regression. Point this at genuinely LLM-backed nodes.
+- ENTRY nodes (no declared predecessor) do not carry their initial LangGraph
+  inputs in the fingerprint or `current_outputs`, and backends treat them as
+  sources (echo the recorded output). So an intervention on the FIRST node is
+  not faithfully recomputed yet — target a downstream node, or use the explicit
+  `InstrumentedAgent` seam. Capturing initial inputs as source dependencies is
+  future work.
 
 HONEST CAVEAT (soundness): LangGraph nodes read a SHARED state object, so a
 node's true inputs can include state written by non-adjacent nodes. Using the
 graph's control-flow edges as the declared dependency edges therefore
-UNDER-declares data dependencies — the classic missing-edge risk. ReplayGate
-does not hide this: it is exactly what `reuse_exposure` and the benchmark's
-false-negative rate measure, and the capture emits a warning to make it visible.
-For nodes with hidden cross-state reads, prefer the explicit `InstrumentedAgent`
-seam (declare deps yourself) or add the missing edges to the captured graph
-before ingest. v1 supports DAG graphs only (a node revisited in a loop is
-rejected by validation)."""
+UNDER-declares data dependencies — the classic missing-edge risk. This capture's
+declared dependencies are UNVERIFIED (the trace carries
+`dependency_coverage="unverified"`); `reuse_exposure` and the benchmark measure
+the GENERAL risk, not whether THIS workflow's dependencies are complete. For
+sound reuse, add the missing edges or use the explicit `InstrumentedAgent` seam.
+v1 supports DAG graphs only (a node revisited in a loop is rejected)."""
 
 from __future__ import annotations
 
@@ -49,9 +64,10 @@ _SPECIAL = {"__start__", "__end__"}
 
 _MISSING_EDGE_WARNING = (
     "replaygate: LangGraph control-flow edges may under-declare true data "
-    "dependencies (nodes share one state object). Selective replay measures this "
-    "as reuse_exposure / the benchmark's false-negative rate; for nodes with hidden "
-    "cross-state reads, add the missing edges or use the explicit InstrumentedAgent seam."
+    "dependencies (nodes share one state object), so THIS capture's declared "
+    "dependencies are unverified (dependency_coverage='unverified'). reuse_exposure "
+    "and the benchmark measure the general risk, not this workflow's completeness. "
+    "For sound reuse, add the missing edges or use the explicit InstrumentedAgent seam."
 )
 
 
@@ -108,5 +124,8 @@ def trace_from_langgraph(app, inputs, workflow_id: str = "langgraph",
         "workflow_id": workflow_id,
         "graph": {"nodes": real, "edges": [list(e) for e in edges]},
         "prompts": dict(prompts or {}),
+        # Declared deps come from control-flow edges only; completeness is not proven
+        # for this workflow (shared-state reads may be undeclared). See module docstring.
+        "dependency_coverage": "unverified",
         "trajectories": trajectories,
     }

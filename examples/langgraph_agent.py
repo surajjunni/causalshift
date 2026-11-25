@@ -1,18 +1,25 @@
-"""End-to-end LangGraph quickstart: capture a trace, then gate a prompt change.
+"""LangGraph capture + recompute-wiring demo (NOT faithful end-to-end replay).
 
     pip install "replaygate[langgraph]"   # or: uv pip install langgraph
     python examples/langgraph_agent.py     # writes the trace + an intervention
 
-Then run the gate on the capture (recompute needs a backend; Ollama shown):
+Then gate the change on the capture (recompute needs a backend; Ollama shown):
 
     replaygate ingest examples/langgraph_trace.json
     replaygate diff --workflow lg_faq \\
         --intervention examples/langgraph_bad_prompt.json \\
         --backend ollama --evaluator judge
 
-The nodes here are pure-Python (no LLM) so capture runs anywhere; the per-node
-prompt ids + prompt texts are what let a real `--backend ollama` recompute the
-answerer (and anything downstream) under the changed prompt.
+What this shows: the capture → ingest → gate PATH, and that per-node prompt ids +
+prompt texts make a captured node recompute-ready.
+
+What this is NOT: a faithful LLM replay. The nodes here are pure-Python, so an LLM
+recompute backend would produce differently-shaped output for reasons that are not
+a model/prompt regression — point ReplayGate at genuinely LLM-backed nodes for a
+real verdict. The intervention targets a DOWNSTREAM node (`answerer`, which reads
+`planner`'s captured output): an intervention on the ENTRY node is not faithfully
+recomputed yet, because initial LangGraph inputs are not captured as dependencies
+(see the adapter docstring).
 """
 
 from __future__ import annotations
@@ -81,11 +88,15 @@ def main() -> int:
     print(f"  edges:    {trace['graph']['edges']}")
     print(f"  prompts:  {[s['prompt_id'] for s in trace['trajectories'][0]['steps']]}")
     print(f"  wrote prompt-change intervention → {interv_path}")
+    print(f"  dependency_coverage: {trace['dependency_coverage']} "
+          "(control-flow edges only; not proven complete)")
     print("\nnext — gate the change on the capture:")
     print("  replaygate ingest examples/langgraph_trace.json")
     print("  replaygate diff --workflow lg_faq "
           "--intervention examples/langgraph_bad_prompt.json "
           "--backend ollama --evaluator judge")
+    print("\nnote: pure-Python nodes here — this demonstrates the path, not a faithful")
+    print("      LLM replay. Use real LLM-backed nodes and target a downstream node.")
     return 0
 
 

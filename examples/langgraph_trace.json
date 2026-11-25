@@ -16,6 +16,7 @@
     "plan.v1": "Make a short plan to answer the question.",
     "answer.v1": "Answer the question using the plan."
   },
+  "dependency_coverage": "unverified",
   "trajectories": [
     {
       "trajectory_id": "lg_faq-t0",

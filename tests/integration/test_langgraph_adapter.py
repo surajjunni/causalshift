@@ -74,4 +74,11 @@ def test_missing_edge_warning_is_emitted():
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         trace_from_langgraph(_app(), inputs=[{"q": "a"}], workflow_id="lg")
-    assert any("under-declare" in str(w.message) for w in caught)
+    assert any("unverified" in str(w.message) for w in caught)
+
+
+def test_trace_marks_dependency_coverage_unverified():
+    # declared deps come from control-flow edges only; the capture must not imply they
+    # are proven complete for this workflow.
+    trace = trace_from_langgraph(_app(), inputs=[{"q": "a"}], workflow_id="lg", warn=False)
+    assert trace["dependency_coverage"] == "unverified"
