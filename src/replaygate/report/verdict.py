@@ -69,6 +69,29 @@ def build_verdict(workflow_id: str, mode: str, results: list[ReplayResult],
     )
 
 
+def gate_unverified_dependencies(v: RegressionVerdict, dependency_coverage: str,
+                                 accept: bool = False) -> bool:
+    """Fail closed on unverified dependencies (Constitution: Soundness Over Savings).
+
+    When a capture's declared dependencies are UNVERIFIED (e.g. a LangGraph graph whose
+    control-flow edges may miss real data deps) and selective replay reused steps, a PASS
+    cannot rule out a missed regression. So downgrade PASS -> INCONCLUSIVE unless the user
+    explicitly accepts the risk (`accept=True`) or ran a sound full re-execution. Only PASS
+    is affected: a FAIL already caught a regression, and an INCONCLUSIVE already blocks.
+    Returns True if it downgraded.
+    """
+    if (dependency_coverage == "unverified" and not accept
+            and v.status == "PASS" and v.mode == "selective"):
+        v.status = "INCONCLUSIVE"
+        v.regressed = False
+        v.notes.append(
+            "dependency_coverage=unverified: selective reuse relied on unverified dependencies, "
+            "so a missed regression cannot be ruled out; PASS downgraded to INCONCLUSIVE. Pass "
+            "--accept-unverified-deps to accept the risk, or run --mode full for a sound re-run.")
+        return True
+    return False
+
+
 def verdict_exit_code(v: RegressionVerdict) -> int:
     """CI exit semantics (fail closed): 0 PASS / 1 FAIL / 2 INCONCLUSIVE. An
     inconclusive or insufficient-evidence run is NEVER a pass (Constitution:
