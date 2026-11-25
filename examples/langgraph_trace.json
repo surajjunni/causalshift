@@ -2,57 +2,43 @@
   "workflow_id": "lg_faq",
   "graph": {
     "nodes": [
-      "classify",
-      "retrieve",
-      "answer"
+      "planner",
+      "answerer"
     ],
     "edges": [
       [
-        "classify",
-        "retrieve"
-      ],
-      [
-        "retrieve",
-        "answer"
+        "planner",
+        "answerer"
       ]
     ]
   },
-  "prompts": {},
+  "prompts": {
+    "plan.v1": "Make a short plan to answer the question.",
+    "answer.v1": "Answer the question using the plan."
+  },
   "trajectories": [
     {
       "trajectory_id": "lg_faq-t0",
       "steps": [
         {
           "step_index": 0,
-          "node_name": "classify",
-          "input_fingerprint": "33cc9463a532607b",
-          "output": "{\"topic\": \"topic:1\"}",
-          "model_id": "node",
-          "prompt_id": "default",
-          "cost": {
-            "tokens": 5,
-            "latency_ms": 0.0
-          }
-        },
-        {
-          "step_index": 1,
-          "node_name": "retrieve",
-          "input_fingerprint": "dbda47ba7ee98499",
-          "output": "{\"facts\": \"facts_for_topic:1\"}",
-          "model_id": "node",
-          "prompt_id": "default",
+          "node_name": "planner",
+          "input_fingerprint": "0cac5fc1af66b043",
+          "output": "{\"plan\": \"plan(what is x?)\"}",
+          "model_id": "llama3",
+          "prompt_id": "plan.v1",
           "cost": {
             "tokens": 7,
             "latency_ms": 0.0
           }
         },
         {
-          "step_index": 2,
-          "node_name": "answer",
-          "input_fingerprint": "dde1dd8a59216410",
-          "output": "{\"answer\": \"answer<facts_for_topic:1>\"}",
-          "model_id": "node",
-          "prompt_id": "default",
+          "step_index": 1,
+          "node_name": "answerer",
+          "input_fingerprint": "c3837175a15c06fe",
+          "output": "{\"answer\": \"answer<plan(what is x?)>\"}",
+          "model_id": "llama3",
+          "prompt_id": "answer.v1",
           "cost": {
             "tokens": 9,
             "latency_ms": 0.0
@@ -65,37 +51,25 @@
       "steps": [
         {
           "step_index": 0,
-          "node_name": "classify",
-          "input_fingerprint": "33cc9463a532607b",
-          "output": "{\"topic\": \"topic:1\"}",
-          "model_id": "node",
-          "prompt_id": "default",
+          "node_name": "planner",
+          "input_fingerprint": "0cac5fc1af66b043",
+          "output": "{\"plan\": \"plan(how does y work?)\"}",
+          "model_id": "llama3",
+          "prompt_id": "plan.v1",
           "cost": {
-            "tokens": 5,
+            "tokens": 8,
             "latency_ms": 0.0
           }
         },
         {
           "step_index": 1,
-          "node_name": "retrieve",
-          "input_fingerprint": "dbda47ba7ee98499",
-          "output": "{\"facts\": \"facts_for_topic:1\"}",
-          "model_id": "node",
-          "prompt_id": "default",
+          "node_name": "answerer",
+          "input_fingerprint": "aea534591cbebff6",
+          "output": "{\"answer\": \"answer<plan(how does y work?)>\"}",
+          "model_id": "llama3",
+          "prompt_id": "answer.v1",
           "cost": {
-            "tokens": 7,
-            "latency_ms": 0.0
-          }
-        },
-        {
-          "step_index": 2,
-          "node_name": "answer",
-          "input_fingerprint": "dde1dd8a59216410",
-          "output": "{\"answer\": \"answer<facts_for_topic:1>\"}",
-          "model_id": "node",
-          "prompt_id": "default",
-          "cost": {
-            "tokens": 9,
+            "tokens": 11,
             "latency_ms": 0.0
           }
         }
@@ -106,37 +80,25 @@
       "steps": [
         {
           "step_index": 0,
-          "node_name": "classify",
-          "input_fingerprint": "33cc9463a532607b",
-          "output": "{\"topic\": \"topic:0\"}",
-          "model_id": "node",
-          "prompt_id": "default",
+          "node_name": "planner",
+          "input_fingerprint": "0cac5fc1af66b043",
+          "output": "{\"plan\": \"plan(why z?)\"}",
+          "model_id": "llama3",
+          "prompt_id": "plan.v1",
           "cost": {
-            "tokens": 5,
+            "tokens": 6,
             "latency_ms": 0.0
           }
         },
         {
           "step_index": 1,
-          "node_name": "retrieve",
-          "input_fingerprint": "766240630e23b1fb",
-          "output": "{\"facts\": \"facts_for_topic:0\"}",
-          "model_id": "node",
-          "prompt_id": "default",
+          "node_name": "answerer",
+          "input_fingerprint": "47e5e8eb21599725",
+          "output": "{\"answer\": \"answer<plan(why z?)>\"}",
+          "model_id": "llama3",
+          "prompt_id": "answer.v1",
           "cost": {
-            "tokens": 7,
-            "latency_ms": 0.0
-          }
-        },
-        {
-          "step_index": 2,
-          "node_name": "answer",
-          "input_fingerprint": "b36ead790ce168f2",
-          "output": "{\"answer\": \"answer<facts_for_topic:0>\"}",
-          "model_id": "node",
-          "prompt_id": "default",
-          "cost": {
-            "tokens": 9,
+            "tokens": 8,
             "latency_ms": 0.0
           }
         }
@@ -147,35 +109,23 @@
       "steps": [
         {
           "step_index": 0,
-          "node_name": "classify",
-          "input_fingerprint": "33cc9463a532607b",
-          "output": "{\"topic\": \"topic:2\"}",
-          "model_id": "node",
-          "prompt_id": "default",
+          "node_name": "planner",
+          "input_fingerprint": "0cac5fc1af66b043",
+          "output": "{\"plan\": \"plan(define w)\"}",
+          "model_id": "llama3",
+          "prompt_id": "plan.v1",
           "cost": {
-            "tokens": 5,
+            "tokens": 6,
             "latency_ms": 0.0
           }
         },
         {
           "step_index": 1,
-          "node_name": "retrieve",
-          "input_fingerprint": "c3091afcb6f360c6",
-          "output": "{\"facts\": \"facts_for_topic:2\"}",
-          "model_id": "node",
-          "prompt_id": "default",
-          "cost": {
-            "tokens": 7,
-            "latency_ms": 0.0
-          }
-        },
-        {
-          "step_index": 2,
-          "node_name": "answer",
-          "input_fingerprint": "8e7c8072c60208d9",
-          "output": "{\"answer\": \"answer<facts_for_topic:2>\"}",
-          "model_id": "node",
-          "prompt_id": "default",
+          "node_name": "answerer",
+          "input_fingerprint": "48efe44c675158e2",
+          "output": "{\"answer\": \"answer<plan(define w)>\"}",
+          "model_id": "llama3",
+          "prompt_id": "answer.v1",
           "cost": {
             "tokens": 9,
             "latency_ms": 0.0

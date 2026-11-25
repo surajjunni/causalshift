@@ -55,3 +55,23 @@ def test_roundtrips_and_fingerprints_are_reusable():
         ok, why = reusable(s.node_name, g, s.input_fingerprint, outputs,
                            s.model_id, s.prompt_id)
         assert ok, f"{s.node_name} should be reusable: {why}"
+
+
+def test_per_node_prompt_and_model_ids_and_prompts_map():
+    trace = trace_from_langgraph(
+        _app(), inputs=[{"q": "a"}], workflow_id="lg", warn=False,
+        node_prompts={"planner": "plan.v1", "answerer": "ans.v1"},
+        node_models={"planner": "m1", "answerer": "m2"},
+        prompts={"plan.v1": "Plan.", "ans.v1": "Answer."})
+    assert trace["prompts"] == {"plan.v1": "Plan.", "ans.v1": "Answer."}
+    steps = {s["node_name"]: s for s in trace["trajectories"][0]["steps"]}
+    assert steps["planner"]["prompt_id"] == "plan.v1" and steps["planner"]["model_id"] == "m1"
+    assert steps["answerer"]["prompt_id"] == "ans.v1" and steps["answerer"]["model_id"] == "m2"
+
+
+def test_missing_edge_warning_is_emitted():
+    import warnings
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        trace_from_langgraph(_app(), inputs=[{"q": "a"}], workflow_id="lg")
+    assert any("under-declare" in str(w.message) for w in caught)

@@ -1,0 +1,11 @@
+{
+  "workflow_id": "lg_faq",
+  "targets": {
+    "answerer": {
+      "prompt_id": "answer.v2"
+    }
+  },
+  "prompts": {
+    "answer.v2": "Answer in a single vague word, nothing else."
+  }
+}
