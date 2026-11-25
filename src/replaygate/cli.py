@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -18,6 +19,20 @@ from replaygate.report.diff import diff_report
 from replaygate.report.verdict import build_verdict, format_verdict, verdict_exit_code
 from replaygate.store.db import TraceStore, load_workflow
 from replaygate.store.validate import TraceInputError
+
+
+def _nonneg_float(s: str) -> float:
+    v = float(s)
+    if not math.isfinite(v) or v < 0:
+        raise argparse.ArgumentTypeError("must be a finite number >= 0")
+    return v
+
+
+def _pos_int(s: str) -> int:
+    v = int(s)
+    if v < 1:
+        raise argparse.ArgumentTypeError("must be >= 1")
+    return v
 
 DEFAULT_DB = "replaygate.db"
 
@@ -105,7 +120,8 @@ def _cmd_diff(args) -> int:
 
     results = [selective_replay(t, graph, intervention, backend, evaluator)
                for t in wf.trajectories]
-    verdict = build_verdict(wf.workflow_id, "selective", results)
+    verdict = build_verdict(wf.workflow_id, "selective", results,
+                            min_samples=args.min_samples, epsilon=args.margin)
     selective_calls = sum(r.calls for r in results)
     # Fair full-baseline estimate: every non-source node recomputes once per trajectory.
     full_estimate = sum(1 for t in wf.trajectories for s in t.steps
@@ -113,9 +129,10 @@ def _cmd_diff(args) -> int:
     if args.json:
         print(json.dumps(verdict.__dict__ | {
             "selective_calls": selective_calls, "full_estimate": full_estimate,
-            "targets": list(intervention.targets)}, indent=2, default=list))
+            "targets": list(intervention.targets), "margin": args.margin}, indent=2, default=list))
     else:
-        print(diff_report(verdict, list(intervention.targets), selective_calls, full_estimate))
+        print(diff_report(verdict, list(intervention.targets), selective_calls, full_estimate,
+                          margin=args.margin, min_samples=args.min_samples, fmt=args.format))
     return verdict_exit_code(verdict)
 
 
@@ -166,6 +183,12 @@ def build_parser() -> argparse.ArgumentParser:
     p_df.add_argument("--model", default="llama3:latest")
     p_df.add_argument("--judge-model", default="llama3:latest")
     p_df.add_argument("--max-recompute", type=int, default=None)
+    p_df.add_argument("--margin", type=_nonneg_float, default=0.0,
+                      help="non-inferiority margin (>= 0): PASS needs the 95%% CI to stay above -margin")
+    p_df.add_argument("--min-samples", type=_pos_int, default=3,
+                      help="minimum usable trajectories (>= 1); fewer → INCONCLUSIVE (fail closed)")
+    p_df.add_argument("--format", choices=["text", "markdown"], default="text",
+                      help="human-readable output format (use --json for machine-readable)")
     p_df.add_argument("--json", action="store_true")
     p_df.set_defaults(func=_cmd_diff)
 

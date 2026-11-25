@@ -33,8 +33,12 @@ def build_verdict(workflow_id: str, mode: str, results: list[ReplayResult],
         status = "INCONCLUSIVE"
     elif regressed:
         status = "FAIL"
-    elif epsilon > 0 and lo < -epsilon:
-        status = "INCONCLUSIVE"          # CI straddles the non-inferiority margin
+    elif lo < -epsilon:
+        # The CI crosses the degradation boundary -epsilon, so non-regression is NOT
+        # demonstrated. Applies at the zero-margin default too: a CI straddling 0 is
+        # INCONCLUSIVE, never a silent PASS (fail closed; keeps PASS consistent with
+        # "the whole 95% CI is above the boundary").
+        status = "INCONCLUSIVE"
     else:
         status = "PASS"
 
@@ -42,7 +46,8 @@ def build_verdict(workflow_id: str, mode: str, results: list[ReplayResult],
         "magnitude/CI are MEASURED by bootstrap over trajectories",
         f"status fail-closed: need >= {min_samples} usable trajectories and no "
         f"inconclusive ones to conclude (usable={len(usable)}, inconclusive={inconclusive})",
-        f"regressed = CI of (candidate-baseline) lies below -epsilon (epsilon={epsilon})",
+        f"regressed = CI upper bound lies below -epsilon; PASS requires the whole CI "
+        f"at or above -epsilon (epsilon={epsilon})",
     ]
     exposure = None
     if mode == "selective":
