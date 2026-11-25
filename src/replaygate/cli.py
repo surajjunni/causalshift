@@ -16,7 +16,9 @@ from replaygate.intervene.apply import validate_intervention
 from replaygate.models import Intervention
 from replaygate.replay.engine import full_replay, selective_replay
 from replaygate.report.diff import diff_report
-from replaygate.report.verdict import build_verdict, format_verdict, verdict_exit_code
+from replaygate.report.verdict import (
+    build_verdict, format_verdict, gate_unverified_dependencies, verdict_exit_code,
+)
 from replaygate.store.db import TraceStore, load_workflow
 from replaygate.store.validate import TraceInputError
 
@@ -122,6 +124,10 @@ def _cmd_diff(args) -> int:
                for t in wf.trajectories]
     verdict = build_verdict(wf.workflow_id, "selective", results,
                             min_samples=args.min_samples, epsilon=args.margin)
+    # Fail closed on unverified dependencies: a PASS that reused steps whose deps are not
+    # verified cannot rule out a missed regression (pass --accept-unverified-deps to override).
+    deps_downgraded = gate_unverified_dependencies(
+        verdict, wf.dependency_coverage, accept=args.accept_unverified_deps)
     selective_calls = sum(r.calls for r in results)
     # Fair full-baseline estimate: every non-source node recomputes once per trajectory.
     full_estimate = sum(1 for t in wf.trajectories for s in t.steps
@@ -129,10 +135,14 @@ def _cmd_diff(args) -> int:
     if args.json:
         print(json.dumps(verdict.__dict__ | {
             "selective_calls": selective_calls, "full_estimate": full_estimate,
-            "targets": list(intervention.targets), "margin": args.margin}, indent=2, default=list))
+            "targets": list(intervention.targets), "margin": args.margin,
+            "dependency_coverage": wf.dependency_coverage,
+            "deps_downgraded": deps_downgraded}, indent=2, default=list))
     else:
         print(diff_report(verdict, list(intervention.targets), selective_calls, full_estimate,
-                          margin=args.margin, min_samples=args.min_samples, fmt=args.format))
+                          margin=args.margin, min_samples=args.min_samples, fmt=args.format,
+                          dependency_coverage=wf.dependency_coverage,
+                          deps_downgraded=deps_downgraded))
     return verdict_exit_code(verdict)
 
 
@@ -187,6 +197,9 @@ def build_parser() -> argparse.ArgumentParser:
                       help="non-inferiority margin (>= 0): PASS needs the 95%% CI to stay above -margin")
     p_df.add_argument("--min-samples", type=_pos_int, default=3,
                       help="minimum usable trajectories (>= 1); fewer → INCONCLUSIVE (fail closed)")
+    p_df.add_argument("--accept-unverified-deps", action="store_true",
+                      help="allow PASS even when dependency_coverage is unverified "
+                           "(default: such a PASS is downgraded to INCONCLUSIVE)")
     p_df.add_argument("--format", choices=["text", "markdown"], default="text",
                       help="human-readable output format (use --json for machine-readable)")
     p_df.add_argument("--json", action="store_true")

@@ -48,7 +48,8 @@ def workflow_from_dict(raw: dict) -> Workflow:
         ))
 
     wf = Workflow(workflow_id=wf_id, nodes=nodes, edges=edges, trajectories=trajectories,
-                  prompts=dict(raw.get("prompts", {})))
+                  prompts=dict(raw.get("prompts", {})),
+                  dependency_coverage=raw.get("dependency_coverage", "declared"))
     validate_workflow(wf)   # raises TraceInputError on out-of-contract input
     return wf
 
@@ -59,7 +60,7 @@ def load_workflow(path: Union[str, Path]) -> Workflow:
 
 
 _SCHEMA = """
-CREATE TABLE IF NOT EXISTS workflows(workflow_id TEXT PRIMARY KEY);
+CREATE TABLE IF NOT EXISTS workflows(workflow_id TEXT PRIMARY KEY, dependency_coverage TEXT);
 CREATE TABLE IF NOT EXISTS nodes(workflow_id TEXT, ordinal INT, node_name TEXT);
 CREATE TABLE IF NOT EXISTS edges(workflow_id TEXT, ordinal INT, src TEXT, dst TEXT);
 CREATE TABLE IF NOT EXISTS trajectories(
@@ -78,13 +79,19 @@ class TraceStore:
         self.conn = sqlite3.connect(db_path)
         self.conn.row_factory = sqlite3.Row
         self.conn.executescript(_SCHEMA)
+        # migrate DBs created before the dependency_coverage column existed
+        try:
+            self.conn.execute("ALTER TABLE workflows ADD COLUMN dependency_coverage TEXT")
+        except sqlite3.OperationalError:
+            pass
 
     def ingest(self, wf: Workflow) -> None:
         validate_workflow(wf)
         c = self.conn
         for tbl in ("steps", "trajectories", "edges", "nodes", "prompts", "workflows"):
             c.execute(f"DELETE FROM {tbl} WHERE workflow_id=?", (wf.workflow_id,))
-        c.execute("INSERT INTO workflows VALUES(?)", (wf.workflow_id,))
+        c.execute("INSERT INTO workflows(workflow_id, dependency_coverage) VALUES(?,?)",
+                  (wf.workflow_id, wf.dependency_coverage))
         c.executemany("INSERT INTO prompts VALUES(?,?,?)",
                       [(wf.workflow_id, pid, txt) for pid, txt in wf.prompts.items()])
         c.executemany("INSERT INTO nodes VALUES(?,?,?)",
@@ -130,4 +137,9 @@ class TraceStore:
             trajs.append(Trajectory(tr["trajectory_id"], workflow_id, steps, gt))
         prompts = {r["prompt_id"]: r["text"] for r in c.execute(
             "SELECT prompt_id,text FROM prompts WHERE workflow_id=?", (workflow_id,))}
-        return Workflow(workflow_id, nodes, edges, trajs, prompts=prompts)
+        wrow = c.execute("SELECT dependency_coverage FROM workflows WHERE workflow_id=?",
+                         (workflow_id,)).fetchone()
+        dep_cov = (wrow["dependency_coverage"] if wrow and wrow["dependency_coverage"]
+                   else "declared")
+        return Workflow(workflow_id, nodes, edges, trajs, prompts=prompts,
+                        dependency_coverage=dep_cov)
