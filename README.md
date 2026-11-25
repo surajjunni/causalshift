@@ -4,25 +4,27 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](pyproject.toml)
 
-**Regression testing for LLM agents — catch prompt and model-change regressions on
-your real traffic, before you ship.** ReplayGate is a CI gate for prompt/model
-changes: it replays recorded agent trajectories, recomputes only the
-causally-affected steps (dependency-aware selective replay), and returns a
-PASS / FAIL / INCONCLUSIVE verdict with the **false-negative rate as the headline
-metric**. Works with LangGraph, MLflow, CrewAI, the OpenAI Agents SDK, and
-OpenTelemetry traces; local (Ollama) or cloud (OpenAI/Anthropic) models.
+**Did a change to your AI app make it worse? Check before you ship it.**
+
+You change a prompt or swap the model behind your AI app to improve it, and your tests pass. But a
+small change can quietly make the answers *worse*, and ordinary tests often miss it because the AI
+doesn't answer the same way every time.
+
+**ReplayGate catches it.** You give it the change you're about to make, and it checks that change
+against your app's **real past runs**. Then it tells you one of three things: safe, worse, or not sure.
 
 📝 **Launch post:** [Your agent's prompt change passed CI. Did it actually get *worse*?](https://surajjyothiunni1.substack.com/p/your-agents-prompt-change-passed)
 
-> You're about to swap a model or edit a prompt behind a production agent. On
-> your *real* recorded traffic — not hand-written test cases — will quality
-> regress, which step is responsible, and can you find out cheaply?
+## How it works
 
-ReplayGate replays recorded agent trajectories under a proposed change,
-recomputes only the **causally-affected** nodes (reusing recorded outputs
-elsewhere *only when provably valid*), and reports: did quality regress
-(with a confidence interval), which decision caused it, and the **measured
-false-negative risk** of any reuse.
+1. You record some real runs of your agent (you do this once).
+2. You make a change: a new prompt, or a new model.
+3. ReplayGate replays those recorded runs with your change and answers:
+   - **PASS** — safe to ship.
+   - **FAIL** — it got worse.
+   - **NOT SURE** — it won't guess, so it stops the change.
+
+It's fast because it only re-runs the steps your change can actually affect.
 
 ## Install
 
@@ -30,65 +32,73 @@ false-negative risk** of any reuse.
 uv venv && uv pip install -e ".[dev]"   # or: pip install -e ".[dev]"
 ```
 
-## Use
+This installs ReplayGate. You need Python 3.12 or newer.
 
-**Is this change safe? (one command)** — the front door:
+## Try it
+
+It's two commands:
 
 ```bash
-replaygate ingest trajectories.json                 # validate + load (rejects cyclic/out-of-contract)
-replaygate diff --workflow W --intervention change.json --backend ollama --evaluator judge
+replaygate ingest trajectories.json
+replaygate diff --workflow support-bot --intervention change.json --backend ollama
 ```
 
+Here's what every part means:
+
+- **`trajectories.json`** — the recording of your agent's past runs. You make this once (see
+  *Record your runs* below). *(A "trajectory" is just one run of the agent from start to finish.)*
+- **`replaygate ingest`** — loads that recording so ReplayGate can use it.
+- **`replaygate diff`** — the main command. It asks: *is this change safe?*
+- **`--workflow support-bot`** — the name of your agent (whatever you called it when recording).
+- **`--intervention change.json`** — a small file that describes the change you want to test (which
+  step's prompt or model you're changing, and the new value). Example below.
+- **`--backend ollama`** — which AI actually re-runs the changed steps. `ollama` runs a model on
+  your own computer. You can also use `openai` or `anthropic` (put your API key in an environment
+  variable; if it's missing, ReplayGate says NOT SURE instead of guessing).
+
+You'll get a short report:
+
 ```text
-ReplayGate — change risk report [W]
-  verdict:      FAIL — quality regresses
-  impact:       -0.675 mean quality (95% CI [-0.850, -0.500])
-  changed step: responder
+ReplayGate — change risk report [support-bot]
+
+  ✗ FAIL — quality regresses
+  → Don't ship: quality regresses — the 95% CI is entirely past the margin.
+
+  change:       responder
+  impact:       -0.675 mean quality (95% CI [-0.850, -0.500], margin -0.000) — candidate scores 0.675 lower on average
   cost:         selective made 4 model call(s); full re-execution ≈ 12 (saved ~8, 67%)
-  reuse:        exposure 0.75 (fraction of nodes reused) — an exposure measure, not a miss probability
+  reuse:        exposure 0.75 — fraction of nodes reused, not a miss probability
   exit:         1  (0 PASS / 1 FAIL / 2 INCONCLUSIVE)
 ```
 
-Exit codes gate CI directly (0 pass / 1 fail / 2 inconclusive-fails-closed). Lower-level commands:
+The last line is an **exit code** you can use in automation: `0` safe, `1` worse, `2` not sure.
 
-```bash
-replaygate evaluate --workflow W --intervention change.json --mode selective --backend ollama
-replaygate benchmark                                # the injected-fault quality gate
-python benchmark/sweep.py                            # false-negatives vs topology × hidden-edge frequency
+**What `change.json` looks like:**
+
+```json
+{
+  "targets": { "responder": { "prompt_id": "respond.v2" } },
+  "prompts": { "respond.v2": "Answer in a single short sentence." }
+}
 ```
 
-The sweep makes the headline honesty visible: the false-negative rate scales
-with **hidden-edge frequency** (how complete the declared dependency graph is),
-not with the policy — measured across topologies, with CIs, against independent
-ground truth, and `full_missed ~0` confirming the oracle.
+This says: *change the `responder` step's prompt to this new text, and test it.*
 
-**Recompute backends** (`--backend`): `none` (default), `ollama` (local),
-`openai`, `anthropic`. Cloud backends read the key from the environment
-(`OPENAI_API_KEY` / `ANTHROPIC_API_KEY`) — never passed on the command line or
-logged — and **fail closed**: with no key (or any API error) the affected nodes
-are inconclusive and the run exits 2, never a silent pass. Cloud backends are
-offline-tested (fallback + parsing) but not yet exercised against the live APIs;
-validate against your account.
+Other handy options: `--margin` (how big a drop counts as "worse"), `--format markdown` (a version
+you can paste into a GitHub pull request), `--json` (for scripts).
 
-```bash
-export OPENAI_API_KEY=...   # your shell, not ReplayGate
-replaygate diff --workflow W --intervention change.json --backend openai --evaluator judge
-```
+## Record your runs
 
-See `specs/001-causal-regression-core/quickstart.md` for runnable scenarios and
-`specs/001-causal-regression-core/contracts/` for the input/backend/CLI contracts.
-
-## Instrumenting your agent (the light seam)
-
-Capturing a trace is the one thing a user must add. The seam is deliberately
-small: **declare each node's dependencies once**, and inputs, outputs and
-fingerprints are captured automatically.
+ReplayGate needs a recording of your agent running. You add one small thing: for each step, say
+what it needs. Everything else is recorded for you.
 
 ```python
 from replaygate.instrument import InstrumentedAgent
 
-agent = InstrumentedAgent("support")
+agent = InstrumentedAgent("support-bot")
 
+# deps=[...] lists what each step needs. "planner" needs the question;
+# "responder" needs the planner's output.
 @agent.node("planner", deps=["question"], prompt_id="plan.v1", prompt="Plan how to answer.")
 def planner(question): ...
 
@@ -97,104 +107,74 @@ def responder(planner): ...
 
 for i, q in enumerate(questions):
     with agent.trajectory(f"t{i}") as run:
-        run.set("question", q)   # a source input
-        run.run_all()            # runs nodes in dependency order, capturing each
+        run.set("question", q)   # a starting input
+        run.run_all()            # runs the steps in order and records each one
 
-agent.save("trace.json")         # ready for `replaygate ingest`
+agent.save("trajectories.json")  # this is the file you pass to `replaygate ingest`
 ```
 
-Declared `deps=` are the dependency edges — the honest level of instrumentation
-(explicit DAG). The emitted fingerprints are exactly what the replay validity
-predicate consumes, so a captured trace is immediately replayable.
-
-- `examples/instrumented_agent.py` — the seam on a pure-Python agent (no LLM).
-- `examples/live_agent.py --evaluate` — the seam on a live Ollama agent, which
-  records a trace *and* evaluates a prompt change end to end. Measured (llama3,
-  4 trajectories): both modes detect the regression; **selective 4 recompute
-  calls vs full 12** (same prompt-construction for record and replay).
-
-### From a framework: LangGraph (near-zero code)
-
-Already on LangGraph? Capture a trace from a compiled graph with no node rewrites:
+**Using LangGraph?** You can record straight from your graph, with almost no extra code:
 
 ```python
 from replaygate.adapters.langgraph import trace_from_langgraph
 
 app = graph.compile()
 trace = trace_from_langgraph(app, inputs=[{"q": q} for q in questions])
-# -> store.workflow_from_dict(trace), or dump to JSON for `replaygate ingest`
+# -> save to JSON for `replaygate ingest`
 ```
 
-The graph's nodes/edges become the declared dependency DAG and `app.stream(...)`
-captures each node's output. **Caveat:** LangGraph nodes share one state object,
-so control-flow edges can under-declare true data dependencies (the missing-edge
-risk) — which `reuse_exposure` and the benchmark then measure, not hide. For
-nodes with hidden cross-state reads, add the edges or use the explicit seam.
-`examples/langgraph_agent.py` runs with no LLM. Install: `pip install "replaygate[langgraph]"`.
+One honest note for LangGraph: its steps share data, so a recording can miss some links between
+steps. ReplayGate notices, marks that recording "unverified", and will **not** give you a confident
+PASS from it (it says NOT SURE) unless you add `--accept-unverified-deps`. Add the missing links, or
+use the setup above, for a fully checked run. See `examples/langgraph_agent.py`.
 
-### Other frameworks
+## Works with
 
-| Framework | How | Runnable example | Status |
-|---|---|---|---|
-| **LangGraph** | `adapters.langgraph.trace_from_langgraph(app, inputs)` | `examples/langgraph_agent.py` | live-tested |
-| **MLflow Tracing** | `adapters.mlflow.trace_from_mlflow(traces)` (span_id/parent_id → edges) | `examples/mlflow_agent.py` | shim over the span core; validate vs your MLflow version |
-| **CrewAI** | `adapters.crewai.trace_from_crewai(tasks, crew.kickoff())` — task `context` → edges | `examples/crewai_agent.py` | validate vs your CrewAI version |
-| **OpenAI Agents SDK / LlamaIndex / OpenTelemetry** | normalize their spans to `{name, parent, output}` and call `adapters.spans.trace_from_spans(traces)` | span recipe below | generic span core (tested) |
+| Framework | How to record | Example |
+|---|---|---|
+| **LangGraph** | `adapters.langgraph.trace_from_langgraph(app, inputs)` | `examples/langgraph_agent.py` |
+| **MLflow Tracing** | `adapters.mlflow.trace_from_mlflow(traces)` | `examples/mlflow_agent.py` |
+| **CrewAI** | `adapters.crewai.trace_from_crewai(tasks, crew.kickoff())` | `examples/crewai_agent.py` |
+| **OpenAI Agents SDK / LlamaIndex / OpenTelemetry** | turn spans into `{name, parent, output}` and call `adapters.spans.trace_from_spans(traces)` | span recipe below |
 
-Every example runs with **no framework install** (stand-in objects that mirror
-each framework's real shape; the real call is shown in a comment) — so you can
-see the capture→trace path, then swap in your real app.
-
-Span-based recipe (covers any tracing stack):
+Every example runs with **no framework installed** (stand-ins mirror the real shape), so you can
+see how recording works first, then swap in your real app.
 
 ```python
 from replaygate.adapters.spans import trace_from_spans
-# each trajectory = a list of spans; span = {"name", "parent": <parent node name|None>, "output"}
+# each run is a list of spans; a span is {"name", "parent": <parent name or None>, "output"}
 trace = trace_from_spans([[{"name": "retrieve", "parent": None, "output": docs},
                            {"name": "answer", "parent": "retrieve", "output": ans}]])
 ```
 
-Same soundness caveat applies to all: a span/parent tree is control-flow, so it
-can under-declare true data dependencies — measured by `reuse_exposure` and the
-benchmark, not hidden. The span core is tested; the per-framework shims are
-validated against documented object shapes — confirm against your installed
-version (and open an issue if a field moved).
+## It tells you when it might be wrong
 
-## How it relates to other tools (honest scope)
+ReplayGate is fast because it reuses old results for the steps your change can't touch. That's only
+safe if it knows how the steps connect. If a connection is missing, it could reuse an old result and
+miss a real problem.
 
-ReplayGate occupies a gap the adjacent tools state they do **not** fill:
+ReplayGate is upfront about this:
 
-- **Tracely and the `agent-replay` family** replay *recorded* model outputs to
-  catch orchestration regressions. By design they cannot test a **model/prompt
-  change** (the recorded output is invalid once the model changes); they point
-  you to live experiments for that. ReplayGate *is* that live-but-cheap path.
-- **DeepEval / promptfoo** compare models/prompts, but on **hand-written test
-  cases**. ReplayGate uses your **real recorded traffic** instead.
-- **CAR (arXiv 2606.08275) and CausalFlow (arXiv 2605.25338)** attribute *which
-  step caused a single run's failure*. ReplayGate is **not** competing with
-  them on general single-run attribution — it answers the **deployment**
-  question (is change B safe across a population) and contributes
-  **dependency-aware selective replay** (fewer model calls than full
-  re-execution), with its own soundness measured.
+- It **measures how often it misses**, on a test with known answers: `replaygate benchmark`.
+- When it isn't sure a step is safe to reuse, it **re-runs the step** instead of guessing.
+- You can always do a **full re-run** with `--mode full`: slower, but always correct.
 
-## The honest caveat
+## Compared to other tools
 
-Reuse is only as sound as the declared dependency graph. If a true dependency
-is undeclared (a *missing edge*), selective replay can reuse a stale output and
-**miss a regression**. ReplayGate does not hide this: the false-negative rate
-is the headline metric, measured against ground truth by `replaygate
-benchmark`, and the engine fails toward recompute whenever validity is
-uncertain. Full re-execution (`--mode full`) is always available as the sound,
-if slower, oracle.
+- Some tools replay recorded outputs to catch wiring bugs, but they can't test a prompt or model
+  *change* (the recording is the very thing the change would alter). ReplayGate tests the change.
+- Tools like DeepEval and promptfoo compare prompts on hand-written examples. ReplayGate uses your
+  real past runs instead.
 
-v1 scope: deterministic, explicitly instrumented **DAG-style** agents. Cyclic
-and opaque-stateful agents are rejected, not silently analyzed. See
-`.specify/memory/constitution.md` for the governing principles.
+## What it supports
+
+Agents whose steps run in a simple one-way order (no loops), where you've said how the steps
+connect. Loops and hidden-state agents are turned away, not guessed at. The guiding rules are in
+`.specify/memory/constitution.md`.
 
 ---
 
-**Keywords:** LLM agent regression testing · prompt regression testing · model
-upgrade / model-swap testing for AI agents · LLM evaluation · LLMOps · agent
-observability · CI gate for prompt and model changes · counterfactual / causal
-replay · selective replay · false-negative rate · LangGraph · MLflow · CrewAI ·
-OpenAI Agents SDK · OpenTelemetry · Ollama · OpenAI · Anthropic · Python.
+**Keywords:** LLM agent regression testing · prompt regression testing · model-swap testing for AI
+agents · LLM evaluation · LLMOps · CI gate for prompt and model changes · selective replay ·
+false-negative rate · LangGraph · MLflow · CrewAI · OpenAI Agents SDK · OpenTelemetry · Ollama ·
+OpenAI · Anthropic · Python.
