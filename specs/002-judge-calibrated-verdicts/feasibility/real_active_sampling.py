@@ -93,5 +93,5 @@ for key in ("human_rand", "ppi_rand", "active_naive", "active_pps"):
     mult = (base / rmse) ** 2
     print(f"  {key:14s} |  {cov:5.1f}% | {rmse:.3f} |  {mult:.2f}x")
 print("  " + "-" * 64)
-print("  active_naive: unweighted top-uncertain selection — watch coverage.")
-print("  active_pps:   probability-proportional + Horvitz-Thompson — coverage should hold.")
+print("  active_naive: unweighted top-uncertain selection (deterministic) — exploratory.")
+print("  active_pps:   Hájek-weighted exploratory estimate; coverage not validated.")
