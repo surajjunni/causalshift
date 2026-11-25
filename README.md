@@ -6,22 +6,12 @@
 
 **Did a change to your AI app make it worse? Check before you ship it.**
 
-## New here? Start with this
+You change a prompt or swap the model behind your AI app to improve it, and your tests pass. But a
+small change can quietly make the answers *worse*, and ordinary tests often miss it because the AI
+doesn't answer the same way every time.
 
-An **AI agent** is a program that uses an AI model (like GPT, Claude, or Llama) to do a job in a few
-steps. Example: read a question → look up facts → write an answer.
-
-Two things people change to try to make an agent better:
-
-- The **prompt** — the instructions you give the model, like *"Answer in one short sentence."*
-- The **model** — swapping one AI model for another.
-
-The catch: a small change can quietly make the answers *worse*, and ordinary tests often miss it,
-because the AI doesn't give the same answer every time.
-
-**ReplayGate catches it.** You give it a change you're about to make, and it checks that change
-against your agent's **real past runs**. Then it tells you one of three things: safe, worse, or
-not sure.
+**ReplayGate catches it.** You give it the change you're about to make, and it checks that change
+against your app's **real past runs**. Then it tells you one of three things: safe, worse, or not sure.
 
 📝 **Launch post:** [Your agent's prompt change passed CI. Did it actually get *worse*?](https://surajjyothiunni1.substack.com/p/your-agents-prompt-change-passed)
 
