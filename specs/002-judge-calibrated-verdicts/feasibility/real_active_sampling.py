@@ -7,8 +7,12 @@ human label is most informative). Three estimators at a fixed budget:
 
   1. random PPI        — random n docs, unweighted residual correction (the 1.28x baseline)
   2. naive active      — top-n most-uncertain docs, UNWEIGHTED (expected: lower RMSE but biased)
-  3. PPS active        — sample n docs with prob proportional to uncertainty, Horvitz-Thompson
-                         reweighted residual (expected: coverage preserved)
+  3. PPS active        — sample n docs with prob proportional to uncertainty, Hajek-reweighted residual
+
+EXPLORATORY ONLY. The active rows are not a validated design-based analysis: the top-uncertain
+selection is deterministic (identical across draws), and the PPS variance is a plug-in, not a full
+design-based (inclusion-probability) estimator. Treat these as a directional probe, not validated
+coverage. The random human-only and random PPI rows use the corrected finite-population intervals.
 
 Compared to random human-only@n as the cost baseline. Ground truth mu = full 100-doc human mean.
 """
@@ -51,13 +55,15 @@ for a, b in pairs:
         # random baselines
         ridx = RNG.choice(nD, N, replace=False)
         hl, jl = dh[ridx], dj[ridx]
+        fpc = 1.0 - N / nD   # finite-population correction (w/o-replacement labels)
         # human-only random
-        mh, sh = hl.mean(), hl.std(ddof=1) / np.sqrt(N)
-        # PPI random
-        res = hl - jl; mp, sp = jm_all + res.mean(), np.sqrt(res.var(ddof=1) / N + jv_all)
-        # naive active (top-n uncertain, unweighted)
+        mh, sh = hl.mean(), np.sqrt(fpc * hl.var(ddof=1) / N)
+        # PPI random (no judge-variance term: judge fully observed)
+        res = hl - jl; mp, sp = jm_all + res.mean(), np.sqrt(fpc * res.var(ddof=1) / N)
+        # naive active (top-n uncertain, unweighted) — EXPLORATORY: deterministic selection, not a
+        # valid probability design; CI shown for comparison only, not design-based coverage.
         ai = top_idx; ares = dh[ai] - dj[ai]
-        ma, sa = jm_all + ares.mean(), np.sqrt(ares.var(ddof=1) / N + jv_all)
+        ma, sa = jm_all + ares.mean(), np.sqrt(fpc * ares.var(ddof=1) / N)
         # PPS active (Poisson sampling by p_incl, HT-weighted residual)
         draw = RNG.random(nD) < p_incl
         if draw.sum() < 3:

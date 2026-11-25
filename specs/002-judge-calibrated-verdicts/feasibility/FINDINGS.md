@@ -142,27 +142,32 @@ human mean delta; this uses **real GPT-4 judge error**, not synthetic Se/Sp.
 **Judge informativeness (real): corr(judge Δ, human Δ) = 0.60** (coherence) — a *moderately*
 informative judge, i.e. the realistic middle regime, not the "informative judge" best case.
 
+*Methodology note (v2, post-review):* the estimand is the finite-population 100-doc human mean and
+labels are drawn without replacement, so the intervals use the **finite-population correction**
+`(1 − n/N)·s²/n` and the PPI interval carries **no judge-variance term** (the judge is fully observed
+on all N docs). This corrects an earlier over-conservative interval; coverage below now sits at the
+nominal ~94%, and the headline findings are unchanged.
+
 | dim / n_labels | estimator | coverage | actionable | RMSE | false-approval |
 |---|---|---|---|---|---|
-| coherence, 30 | human-only | 97.4% | 66.2% | 0.173 | 0.1% |
+| coherence, 30 | human-only | 94.1% | 71.4% | 0.173 | 0.2% |
 | coherence, 30 | naive GPT-4 | **24.2%** | 82.1% | 0.499 | **8.4%** |
-| coherence, 30 | **PPI** | **98.5%** | 67.5% | **0.153** | **0.0%** |
-| coherence, 15 | human / naive / PPI | 94.8 / 24.2 / **95.7%** | 54.9 / 82.1 / 58.3% | 0.271 / 0.499 / **0.241** | 0.2 / 8.4 / 0.2% |
-| coherence, 50 | human / naive / PPI | 99.2 / 24.2 / **99.7%** | 72.8 / 82.1 / 73.0% | 0.114 / 0.499 / **0.101** | 0.0 / 8.4 / 0.0% |
-| relevance, 30 | human / naive / PPI | 97.4 / 52.5 / **98.8%** | 60.2 / 80.0 / 58.1% | 0.137 / 0.239 / **0.127** | 0.1 / 1.1 / 0.0% |
+| coherence, 30 | **PPI** | **94.2%** | 74.3% | **0.153** | **0.1%** |
+| coherence, 50 | human / naive / PPI | 94.5 / 24.2 / **94.4%** | 80.9 / 82.1 / 82.9% | 0.114 / 0.499 / **0.101** | 0.0 / 8.4 / 0.0% |
+| relevance, 30 | human / naive / PPI | 94.1 / 52.5 / **94.2%** | 66.5 / 80.0 / 68.2% | 0.137 / 0.239 / **0.127** | 0.3 / 1.1 / 0.2% |
 
 ## What the real data says
 
 1. **The safety claim holds, strongly.** The naive uncorrected GPT-4 verdict is *confidently wrong*:
-   coverage collapses to 24–52% and false-approval hits 8.4% (over the 5% limit). PPI rescues
-   coverage to ~95–99.7%, drives false-approval to ~0%, and gives the **best RMSE in every cell**.
-   The "don't ship the judge's biased verdict" value is real and validated on real judge error.
+   coverage collapses to 24–52% and false-approval hits 8.4% (over the 5% limit). PPI restores
+   coverage to the nominal **~94%**, drives false-approval to ~0%, and gives the **best RMSE in every
+   cell**. The "don't ship the judge's biased verdict" value is real and validated on real judge error.
 
 2. **The power claim does NOT materialize on a moderate real judge.** PPI's actionable-verdict rate
-   is essentially tied with human-only (e.g. 67.5% vs 66.2%; on relevance slightly *lower*). The
-   dramatic synthetic gain (52% → 99.8%) required a *highly* informative judge (noise ≪ spread);
-   GPT-4-on-SummEval (ρ≈0.6) is not that. PPI here is a modest accuracy/width improvement, not a
-   jump in decisive verdicts.
+   is barely above human-only (74.3% vs 71.4% on coherence; 68.2% vs 66.5% on relevance — a ~2–3
+   point edge). The dramatic synthetic gain (52% → 99.8%) required a *highly* informative judge
+   (noise ≪ spread); GPT-4-on-SummEval (ρ≈0.6) is not that. PPI here is a modest accuracy/width
+   improvement, not a jump in decisive verdicts.
 
 ## Verdict on "validate before building"
 
@@ -180,6 +185,12 @@ informative judge, i.e. the realistic middle regime, not the "informative judge"
 - SummEval is summary quality, **not agent trajectories** — this validates the statistical core on
   real judge error, not ReplayGate's actual agent-regression setting (that still needs bespoke data).
 - Results depend on margin (0.2) and budget; a better-aligned judge would give PPI more power.
+- The 240 ordered system pairs are NOT 240 independent deployment experiments — they share systems,
+  documents, and human ratings. The aggregate means are descriptive; uncertainty *across* pairs would
+  need document-level clustered resampling, so these are not independent evidence across 240 scenarios.
+- Intervals use the finite-population correction for the 100-doc estimand (see methodology note); the
+  naive judge's interval is the mis-specified super-population one it would report in practice, which
+  is why its coverage collapses under bias.
 
 ## Bottom line (real-data safety vs power)
 
@@ -217,10 +228,10 @@ measure for a regression verdict, and it is the realistic value for GPT-4-on-Sum
 ## Final go / no-go
 
 - **NO-GO** for shipping PPI as ReplayGate v2's **flagship** capability. On a realistic judge its
-  benefits are: a **safety wrapper** (coverage 24%→98%, false-approval 8.4%→0%) and a **modest ~22%
+  benefits are: a **safety wrapper** (coverage 24%→~94%, false-approval 8.4%→0%) and a **modest ~22%
   label saving** — real, but not a flagship product on their own.
 - **GO** for: (1) publishing this as an empirical study — *the limits of LLM judges in deployment
-  decisions*, where the 24%→98% coverage contrast and the honest synthetic-vs-real power gap are the
+  decisions*, where the 24%→~94% coverage contrast and the honest synthetic-vs-real power gap are the
   contribution; (2) optionally offering PPI as a thin, clearly-scoped safety/efficiency add-on to v1,
   not a reframing of the product.
 - **Keep v1** (causal counterfactual selective replay + trustworthy gating) as ReplayGate's
@@ -236,10 +247,13 @@ naive selection breaks coverage. Selection signal: per-doc judge rating uncertai
 
 | estimator | coverage | RMSE | effective vs random human |
 |---|---|---|---|
-| random human-only | 97.4% | 0.173 | 1.00× |
-| random PPI | 98.3% | 0.154 | 1.27× |
-| active, top-uncertain (unweighted) | 99.2% | 0.157 | 1.22× |
-| active, PPS + Hájek weighted | 97.7% | 0.174 | 1.00× |
+| random human-only | 94.1% | 0.173 | 1.00× |
+| random PPI | 94.0% | 0.154 | 1.27× |
+| active, top-uncertain (unweighted) — *exploratory* | 90.8% | 0.157 | 1.22× |
+| active, PPS + Hájek weighted — *exploratory* | 97.7% | 0.174 | 1.00× |
+
+*The two active rows are exploratory, not a validated design-based analysis (deterministic selection;
+plug-in rather than full design-based variance). They are a directional probe only.*
 
 - **No improvement over random PPI.** Unweighted active was slightly worse (1.22×); properly-weighted
   active gave no gain (1.00×). Judge rating-uncertainty is a poor proxy for where the human–judge
@@ -258,10 +272,10 @@ naive selection breaks coverage. Selection signal: per-doc judge rating uncertai
   service, or new deployment policy built just to gain ~22% label efficiency).
 - **Conditional GO** for a **small, optional PPI estimator** that enhances v1's evaluation: its real,
   validated value is (a) a safety wrapper preventing the naive judge's confidently-wrong approvals
-  (coverage 24%→98%, false-approval 8.4%→0%) and (b) a stable ~22% human-label saving — useful, not
+  (coverage 24%→~94%, false-approval 8.4%→0%) and (b) a stable ~22% human-label saving — useful, not
   defining. Note 22% *label* saving ≠ 22% *cost* saving (PPI adds judge inference + integration).
 - **GO** for an **empirical write-up**: *the limits of LLM judges in deployment decisions* (the
-  24%→98% coverage contrast, the synthetic-vs-real power gap, the honest 1.28× efficiency, and the
+  24%→~94% coverage contrast, the synthetic-vs-real power gap, the honest 1.28× efficiency, and the
   active-sampling null result).
 - **Keep v1** — causal counterfactual replay + efficient regression gating — as the product's
   defining, differentiated capability.

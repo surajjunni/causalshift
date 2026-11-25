@@ -1,8 +1,9 @@
 # ReplayGate Judge Calibration: Feasibility and Failure Modes
 
 *How I tried to build a trustworthy deployment gate on top of an untrustworthy LLM judge, what broke,
-and what actually worked. All numbers below are from synthetic Monte-Carlo simulation, not real
-traffic yet.*
+and what actually worked. The results below come from synthetic Monte-Carlo simulation and a real-data
+validation on SummEval with GPT-4 as the judge. All intervals use a finite-population correction
+matched to the estimand; the synthetic numbers move with the assumptions.*
 
 ## The problem
 
@@ -108,8 +109,8 @@ you have real judge error on a real quality-delta task.
 
 The safety result survived contact with reality, and then some. The uncorrected judge was confidently
 wrong: its interval coverage collapsed to 24 percent, and it wrongly approved 8.4 percent of
-regressing changes. PPI pulled coverage back to 98 percent, drove wrong approvals to zero, and gave
-the most accurate estimate every time. If you were going to trust an LLM judge to gate deploys, this
+regressing changes. PPI pulled coverage back to its nominal ~94 percent, drove wrong approvals to
+zero, and gave the most accurate estimate every time. If you were going to trust an LLM judge to gate deploys, this
 is the layer that stops it from lying to you.
 
 The power result did not survive. On this real, moderately-informative judge (its quality-delta

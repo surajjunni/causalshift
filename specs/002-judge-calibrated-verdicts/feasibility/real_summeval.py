@@ -66,14 +66,17 @@ for a, b in itertools.permutations(systems, 2):
     for _ in range(DRAWS):
         idx = RNG.choice(nD, N_LABELS, replace=False)
         hl, jl = dh[idx], dj[idx]
-        # human-only
-        mh, sh = hl.mean(), hl.std(ddof=1) / np.sqrt(N_LABELS)
-        # naive judge (judge mean over all docs, uncorrected)
+        fpc = 1.0 - N_LABELS / nD   # finite-population correction: labels drawn w/o replacement from the N docs
+        # human-only (without-replacement sample mean of the finite population)
+        mh, sh = hl.mean(), np.sqrt(fpc * hl.var(ddof=1) / N_LABELS)
+        # naive judge: judge mean over all docs, uncorrected. Judge is fully observed, so its only
+        # "uncertainty" is the mis-specified super-population judge-sample CI; it ignores judge bias.
         mn, sn = judge_mean, np.sqrt(judge_var)
-        # PPI: judge mean over all + human-minus-judge residual over labeled
+        # PPI: judge pop-mean (a known constant here) + sampled residual correction.
+        # Var(mu_ppi) = (1 - n/N) * s_resid^2 / n  -- NO judge_var term (judge fully observed).
         resid = hl - jl
         mp = judge_mean + resid.mean()
-        sp = np.sqrt(resid.var(ddof=1) / N_LABELS + judge_var)
+        sp = np.sqrt(fpc * resid.var(ddof=1) / N_LABELS)
         for key, (m, s) in (("human", (mh, sh)), ("naive", (mn, sn)), ("ppi", (mp, sp))):
             lo, hi = m - Z * s, m + Z * s
             agg[key]["cov"].append(lo <= mu <= hi)

@@ -59,9 +59,11 @@ for n in BUDGETS:
         for _ in range(DRAWS):
             idx = RNG.choice(nD, n, replace=False)
             hl, jl = dh[idx], dj[idx]
-            mh, sh = hl.mean(), hl.std(ddof=1) / np.sqrt(n)
+            fpc = 1.0 - n / nD   # finite-population correction (labels w/o replacement from N docs)
+            mh, sh = hl.mean(), np.sqrt(fpc * hl.var(ddof=1) / n)
             resid = hl - jl
-            mp, sp = jm + resid.mean(), np.sqrt(resid.var(ddof=1) / n + jv)
+            # PPI var = (1 - n/N) s_resid^2 / n; judge fully observed, no judge-variance term
+            mp, sp = jm + resid.mean(), np.sqrt(fpc * resid.var(ddof=1) / n)
             for key, (m, s) in (("h", (mh, sh)), ("p", (mp, sp))):
                 lo, hi = m - Z * s, m + Z * s
                 stats[key]["cov"].append(lo <= mu <= hi)
