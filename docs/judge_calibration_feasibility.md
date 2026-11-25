@@ -99,22 +99,45 @@ the uncertainty from how the human sample was drawn. Those are three different p
 jointly validated, no single end-to-end 95 percent number is defensible, and advertising one would
 repeat exactly the overconfidence this whole exercise was meant to remove.
 
-## What this became
+## The real-data reality check
 
-The project pivoted. The target is no longer "calibrated judge verdicts," which is established work
-anyway. It is label-efficient, distribution-shift-aware regression testing for LLM agents, with
-statistically justified and deliberately conservative deployment decisions. The individual techniques
-are known; the contribution is applying them correctly to the agent-replay deployment question, and,
-longer term, modeling evaluator and replay uncertainty together.
+Synthetic evidence is where ideas go to look good, so the next step was real data: SummEval, where
+1,600 summaries carry continuous human quality scores, paired with G-Eval's actual GPT-4 ratings on
+the same summaries. Treat one summarization system as the baseline and another as the candidate, and
+you have real judge error on a real quality-delta task.
 
-The broader lesson is cheaper than the feature would have been. A day of simulation, before any API
-design, turned "I think this is a good idea" into a map of where it works, where it quietly fails, and
-what to measure before trusting it. The negative results (binary calibration abstains; global
-calibration lies under shift; low false-approval can be an artifact of abstention) were more valuable
-than the positive one.
+The safety result survived contact with reality, and then some. The uncorrected judge was confidently
+wrong: its interval coverage collapsed to 24 percent, and it wrongly approved 8.4 percent of
+regressing changes. PPI pulled coverage back to 98 percent, drove wrong approvals to zero, and gave
+the most accurate estimate every time. If you were going to trust an LLM judge to gate deploys, this
+is the layer that stops it from lying to you.
+
+The power result did not survive. On this real, moderately-informative judge (its quality-delta
+correlation with humans was 0.60, not the near-perfect alignment the synthetic best case assumed),
+PPI's actionable-decision rate was a statistical tie with just labeling the examples yourself. A
+careful label-efficiency sweep put a number on the real benefit: PPI is worth about a 1.28x effective
+sample, a steady 22 percent reduction in human labels, no more. And a 22 percent cut in labels is not
+a 22 percent cut in cost once you account for the judge inference and plumbing PPI adds. An attempt to
+beat that with active label selection gave nothing, and a naive weighting scheme briefly blew the
+estimate up by a factor of twenty, a reminder that the clever version is its own research problem.
+
+## Final verdict
+
+No-go on making judge calibration the headline of a v2. The honest value is a safety wrapper over the
+judge plus a modest label saving, which is a reasonable optional feature, not a product direction. The
+defensible thing ReplayGate does is still the thing it already did: replay real agent trajectories
+under a change, recompute only the causally affected steps, and gate regressions efficiently. Judge
+calibration can ride along; it should not drive.
+
+The broader lesson is cheaper than the feature would have been. Simulation, then real data, before any
+API design, turned "I think this is a good idea" into a precise map: where it works (safety), where it
+quietly fails (power, under shift, with a real judge), and exactly how much it is worth (1.28x). The
+negative results were worth more than the positive one, and they cost a few days instead of a release.
 
 ---
 
-*Reproduce it: `sim.py` and `sim2.py` in the ReplayGate repo under
-`specs/002-judge-calibrated-verdicts/feasibility/`. Numbers are synthetic and will move with the
-assumptions; the point is the shape of the failure modes, not the third decimal.*
+*Reproduce it in the ReplayGate repo under `specs/002-judge-calibrated-verdicts/feasibility/`:
+`sim.py` and `sim2.py` (synthetic), then `real_summeval.py`, `real_label_efficiency.py`, and
+`real_active_sampling.py` (real SummEval + GPT-4 judge data; download links are in the scripts).
+Synthetic numbers move with the assumptions; the real ones are one judge on one task. The point is the
+shape of the result, not the third decimal.*

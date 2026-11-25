@@ -129,3 +129,139 @@ calibration**, whose power is contingent on (and must report) the judge's inform
 Not "judge-calibrated verdicts" (established) but **label-efficient, distribution-shift-aware
 regression testing for LLM agents with statistically justified deployment decisions** — a
 stronger, still-to-be-validated target. Keep v1 as the stable product; v2 is a research track.
+
+---
+
+# Real-data validation (SC-001) — `real_summeval.py`
+
+Run: `python3 real_summeval.py <data_dir> [n_labels] [dim]`
+Data (not committed, ~28 MB): **SummEval human scores + G-Eval GPT-4 judge ratings** on the same
+1,600 summaries (100 docs × 16 systems). A "change" = system A vs B; ground truth μ = full 100-doc
+human mean delta; this uses **real GPT-4 judge error**, not synthetic Se/Sp.
+
+**Judge informativeness (real): corr(judge Δ, human Δ) = 0.60** (coherence) — a *moderately*
+informative judge, i.e. the realistic middle regime, not the "informative judge" best case.
+
+| dim / n_labels | estimator | coverage | actionable | RMSE | false-approval |
+|---|---|---|---|---|---|
+| coherence, 30 | human-only | 97.4% | 66.2% | 0.173 | 0.1% |
+| coherence, 30 | naive GPT-4 | **24.2%** | 82.1% | 0.499 | **8.4%** |
+| coherence, 30 | **PPI** | **98.5%** | 67.5% | **0.153** | **0.0%** |
+| coherence, 15 | human / naive / PPI | 94.8 / 24.2 / **95.7%** | 54.9 / 82.1 / 58.3% | 0.271 / 0.499 / **0.241** | 0.2 / 8.4 / 0.2% |
+| coherence, 50 | human / naive / PPI | 99.2 / 24.2 / **99.7%** | 72.8 / 82.1 / 73.0% | 0.114 / 0.499 / **0.101** | 0.0 / 8.4 / 0.0% |
+| relevance, 30 | human / naive / PPI | 97.4 / 52.5 / **98.8%** | 60.2 / 80.0 / 58.1% | 0.137 / 0.239 / **0.127** | 0.1 / 1.1 / 0.0% |
+
+## What the real data says
+
+1. **The safety claim holds, strongly.** The naive uncorrected GPT-4 verdict is *confidently wrong*:
+   coverage collapses to 24–52% and false-approval hits 8.4% (over the 5% limit). PPI rescues
+   coverage to ~95–99.7%, drives false-approval to ~0%, and gives the **best RMSE in every cell**.
+   The "don't ship the judge's biased verdict" value is real and validated on real judge error.
+
+2. **The power claim does NOT materialize on a moderate real judge.** PPI's actionable-verdict rate
+   is essentially tied with human-only (e.g. 67.5% vs 66.2%; on relevance slightly *lower*). The
+   dramatic synthetic gain (52% → 99.8%) required a *highly* informative judge (noise ≪ spread);
+   GPT-4-on-SummEval (ρ≈0.6) is not that. PPI here is a modest accuracy/width improvement, not a
+   jump in decisive verdicts.
+
+## Verdict on "validate before building"
+
+- **Validated:** PPI as a **safety + accuracy layer** over an LLM judge — it prevents the naive
+  judge's confident-but-wrong deployment approvals and gives the most accurate estimate, honestly.
+- **Not validated:** the **central SC-001 / SC-003 claim** — "substantially more actionable decisions
+  than human-only at 100–300 labels." On a real, moderately-informative judge it is roughly a tie.
+  That claim holds only when the judge is highly aligned with human quality, which must be measured
+  per deployment, not assumed.
+
+## Caveats
+
+- One task (news-summary quality), one judge (G-Eval GPT-4), and a noisy/ill-defined target
+  (human inter-annotator agreement ≈ 0.48 in the literature) cap the achievable signal.
+- SummEval is summary quality, **not agent trajectories** — this validates the statistical core on
+  real judge error, not ReplayGate's actual agent-regression setting (that still needs bespoke data).
+- Results depend on margin (0.2) and budget; a better-aligned judge would give PPI more power.
+
+## Bottom line (real-data safety vs power)
+
+Real data **tempers** the pivot: build v2 as an **honest safety wrapper over the judge** (its
+validated value), not as a "get many more actionable verdicts from few labels" engine (not validated
+on a moderate judge).
+
+---
+
+# Label-efficiency experiment — `real_label_efficiency.py`
+
+The decisive commercial question is not actionability but **how many human labels PPI saves**. Swept
+budgets 10–80 on the same real data (coverage / actionable / RMSE per budget), and converted PPI's
+accuracy gain into an effective-sample multiplier `(RMSE_human / RMSE_ppi)²`.
+
+| budget | human RMSE | PPI RMSE | PPI effective | labels saved |
+|---|---|---|---|---|
+| 10 | 0.339 | 0.300 | 1.28× | ~2.8 (22%) |
+| 20 | 0.227 | 0.202 | 1.27× | ~5.3 (21%) |
+| 30 | 0.174 | 0.154 | 1.28× | ~8.3 (22%) |
+| 50 | 0.114 | 0.101 | 1.28× | ~13.9 (22%) |
+| 80 | 0.057 | 0.050 | 1.28× | ~22.5 (22%) |
+
+- **PPI saves a stable ~22% of human labels** to reach the same accuracy (1.28× effective sample),
+  consistent across budgets, with a real, moderately-informative judge (ρ_Δ = 0.60).
+- Coverage stays honest (93–100%) and actionable-rate is within ~2–4 points of human-only throughout
+  — the label savings show up in **accuracy/variance, not in the coarse actionable metric**.
+
+### On the correlation question (important)
+
+`corr(judge Δ, human Δ) = 0.60` is computed on **deltas over the same baseline/candidate pairs**
+(`H[a]−H[b]` vs `J[a]−J[b]`), not on individual summary scores. This is the correct informativeness
+measure for a regression verdict, and it is the realistic value for GPT-4-on-SummEval.
+
+## Final go / no-go
+
+- **NO-GO** for shipping PPI as ReplayGate v2's **flagship** capability. On a realistic judge its
+  benefits are: a **safety wrapper** (coverage 24%→98%, false-approval 8.4%→0%) and a **modest ~22%
+  label saving** — real, but not a flagship product on their own.
+- **GO** for: (1) publishing this as an empirical study — *the limits of LLM judges in deployment
+  decisions*, where the 24%→98% coverage contrast and the honest synthetic-vs-real power gap are the
+  contribution; (2) optionally offering PPI as a thin, clearly-scoped safety/efficiency add-on to v1,
+  not a reframing of the product.
+- **Keep v1** (causal counterfactual selective replay + trustworthy gating) as ReplayGate's
+  distinctive capability. A stronger (higher-ρ) judge would raise PPI's savings, so informativeness
+  must be measured per deployment, not assumed.
+
+---
+
+# Active sampling probe — `real_active_sampling.py`
+
+Tests whether selecting the *informative* human labels (vs random) beats PPI's 1.28×, and whether
+naive selection breaks coverage. Selection signal: per-doc judge rating uncertainty. n=30.
+
+| estimator | coverage | RMSE | effective vs random human |
+|---|---|---|---|
+| random human-only | 97.4% | 0.173 | 1.00× |
+| random PPI | 98.3% | 0.154 | 1.27× |
+| active, top-uncertain (unweighted) | 99.2% | 0.157 | 1.22× |
+| active, PPS + Hájek weighted | 97.7% | 0.174 | 1.00× |
+
+- **No improvement over random PPI.** Unweighted active was slightly worse (1.22×); properly-weighted
+  active gave no gain (1.00×). Judge rating-uncertainty is a poor proxy for where the human–judge
+  residual is large (the quantity that reduces variance), and that residual is unobservable before
+  labeling.
+- A first naive Horvitz–Thompson estimator blew up (RMSE ~3.0) from tiny inclusion probabilities —
+  concretely demonstrating the reviewer's warning that active weighting easily destroys the estimate
+  if done carelessly. The stable Hájek version above fixes that but still shows no gain.
+- **Conclusion:** active label selection is a genuine research sub-problem (needs a better
+  informativeness signal and careful estimator design), not a quick lever. It does not change the
+  verdict.
+
+# FINAL VERDICT
+
+- **NO-GO** for a judge-calibration-defined ReplayGate v2 (no elaborate calibration platform, drift
+  service, or new deployment policy built just to gain ~22% label efficiency).
+- **Conditional GO** for a **small, optional PPI estimator** that enhances v1's evaluation: its real,
+  validated value is (a) a safety wrapper preventing the naive judge's confidently-wrong approvals
+  (coverage 24%→98%, false-approval 8.4%→0%) and (b) a stable ~22% human-label saving — useful, not
+  defining. Note 22% *label* saving ≠ 22% *cost* saving (PPI adds judge inference + integration).
+- **GO** for an **empirical write-up**: *the limits of LLM judges in deployment decisions* (the
+  24%→98% coverage contrast, the synthetic-vs-real power gap, the honest 1.28× efficiency, and the
+  active-sampling null result).
+- **Keep v1** — causal counterfactual replay + efficient regression gating — as the product's
+  defining, differentiated capability.
