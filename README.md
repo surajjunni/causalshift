@@ -4,25 +4,37 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](pyproject.toml)
 
-**Check if a prompt or model change made your AI agent worse, before you ship it.**
+**Did a change to your AI app make it worse? Check before you ship it.**
 
-You change a prompt, or switch models. Your tests pass. But did the agent quietly get worse on
-real questions? ReplayGate tells you, using your agent's own past runs.
+## New here? Start with this
+
+An **AI agent** is a program that uses an AI model (like GPT, Claude, or Llama) to do a job in a few
+steps. Example: read a question → look up facts → write an answer.
+
+Two things people change to try to make an agent better:
+
+- The **prompt** — the instructions you give the model, like *"Answer in one short sentence."*
+- The **model** — swapping one AI model for another.
+
+The catch: a small change can quietly make the answers *worse*, and ordinary tests often miss it,
+because the AI doesn't give the same answer every time.
+
+**ReplayGate catches it.** You give it a change you're about to make, and it checks that change
+against your agent's **real past runs**. Then it tells you one of three things: safe, worse, or
+not sure.
 
 📝 **Launch post:** [Your agent's prompt change passed CI. Did it actually get *worse*?](https://surajjyothiunni1.substack.com/p/your-agents-prompt-change-passed)
 
 ## How it works
 
-1. You record some real runs of your agent (once).
+1. You record some real runs of your agent (you do this once).
 2. You make a change: a new prompt, or a new model.
-3. ReplayGate replays those runs with the change and gives you one of three answers:
+3. ReplayGate replays those recorded runs with your change and answers:
    - **PASS** — safe to ship.
    - **FAIL** — it got worse.
-   - **NOT SURE** — it won't guess, so it blocks the deploy.
+   - **NOT SURE** — it won't guess, so it stops the change.
 
-It's fast because it only re-runs the steps your change can affect, and reuses the rest.
-
-Drop it into CI and read the exit code: `0` safe, `1` worse, `2` not sure.
+It's fast because it only re-runs the steps your change can actually affect.
 
 ## Install
 
@@ -30,19 +42,34 @@ Drop it into CI and read the exit code: `0` safe, `1` worse, `2` not sure.
 uv venv && uv pip install -e ".[dev]"   # or: pip install -e ".[dev]"
 ```
 
+This installs ReplayGate. You need Python 3.12 or newer.
+
 ## Try it
 
-Record your runs into `trajectories.json` (see **Record your runs** below), then run:
+It's two commands:
 
 ```bash
 replaygate ingest trajectories.json
-replaygate diff --workflow W --intervention change.json --backend ollama
+replaygate diff --workflow support-bot --intervention change.json --backend ollama
 ```
 
-You get a short report:
+Here's what every part means:
+
+- **`trajectories.json`** — the recording of your agent's past runs. You make this once (see
+  *Record your runs* below). *(A "trajectory" is just one run of the agent from start to finish.)*
+- **`replaygate ingest`** — loads that recording so ReplayGate can use it.
+- **`replaygate diff`** — the main command. It asks: *is this change safe?*
+- **`--workflow support-bot`** — the name of your agent (whatever you called it when recording).
+- **`--intervention change.json`** — a small file that describes the change you want to test (which
+  step's prompt or model you're changing, and the new value). Example below.
+- **`--backend ollama`** — which AI actually re-runs the changed steps. `ollama` runs a model on
+  your own computer. You can also use `openai` or `anthropic` (put your API key in an environment
+  variable; if it's missing, ReplayGate says NOT SURE instead of guessing).
+
+You'll get a short report:
 
 ```text
-ReplayGate — change risk report [W]
+ReplayGate — change risk report [support-bot]
 
   ✗ FAIL — quality regresses
   → Don't ship: quality regresses — the 95% CI is entirely past the margin.
@@ -54,25 +81,34 @@ ReplayGate — change risk report [W]
   exit:         1  (0 PASS / 1 FAIL / 2 INCONCLUSIVE)
 ```
 
-A few things to know:
+The last line is an **exit code** you can use in automation: `0` safe, `1` worse, `2` not sure.
 
-- `change.json` says what you changed (which step's prompt or model).
-- `--backend` is the model that re-runs the changed steps: `ollama` (on your machine), or `openai`
-  / `anthropic`. For the cloud ones, put your key in `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`. If a
-  key is missing, ReplayGate says NOT SURE instead of guessing.
-- Handy flags: `--margin` (how big a drop counts as "worse"), `--format markdown` (paste the report
-  into a pull request), `--json` (for scripts).
+**What `change.json` looks like:**
+
+```json
+{
+  "targets": { "responder": { "prompt_id": "respond.v2" } },
+  "prompts": { "respond.v2": "Answer in a single short sentence." }
+}
+```
+
+This says: *change the `responder` step's prompt to this new text, and test it.*
+
+Other handy options: `--margin` (how big a drop counts as "worse"), `--format markdown` (a version
+you can paste into a GitHub pull request), `--json` (for scripts).
 
 ## Record your runs
 
-ReplayGate needs a recording of your agent running. You add one thing: for each step, say what it
-needs. Everything else is recorded for you.
+ReplayGate needs a recording of your agent running. You add one small thing: for each step, say
+what it needs. Everything else is recorded for you.
 
 ```python
 from replaygate.instrument import InstrumentedAgent
 
-agent = InstrumentedAgent("support")
+agent = InstrumentedAgent("support-bot")
 
+# deps=[...] lists what each step needs. "planner" needs the question;
+# "responder" needs the planner's output.
 @agent.node("planner", deps=["question"], prompt_id="plan.v1", prompt="Plan how to answer.")
 def planner(question): ...
 
@@ -84,10 +120,10 @@ for i, q in enumerate(questions):
         run.set("question", q)   # a starting input
         run.run_all()            # runs the steps in order and records each one
 
-agent.save("trace.json")         # ready for `replaygate ingest`
+agent.save("trajectories.json")  # this is the file you pass to `replaygate ingest`
 ```
 
-**On LangGraph?** Capture straight from your graph, with almost no code:
+**Using LangGraph?** You can record straight from your graph, with almost no extra code:
 
 ```python
 from replaygate.adapters.langgraph import trace_from_langgraph
@@ -97,22 +133,22 @@ trace = trace_from_langgraph(app, inputs=[{"q": q} for q in questions])
 # -> save to JSON for `replaygate ingest`
 ```
 
-LangGraph steps share data, so a recording may miss some links between steps. ReplayGate notices,
-marks that recording "unverified", and will not hand you a confident PASS from it (it says NOT SURE)
-unless you pass `--accept-unverified-deps`. Add the missing links, or use the setup above, for a
-fully checked run. See `examples/langgraph_agent.py`.
+One honest note for LangGraph: its steps share data, so a recording can miss some links between
+steps. ReplayGate notices, marks that recording "unverified", and will **not** give you a confident
+PASS from it (it says NOT SURE) unless you add `--accept-unverified-deps`. Add the missing links, or
+use the setup above, for a fully checked run. See `examples/langgraph_agent.py`.
 
 ## Works with
 
-| Framework | How to capture | Example |
+| Framework | How to record | Example |
 |---|---|---|
 | **LangGraph** | `adapters.langgraph.trace_from_langgraph(app, inputs)` | `examples/langgraph_agent.py` |
 | **MLflow Tracing** | `adapters.mlflow.trace_from_mlflow(traces)` | `examples/mlflow_agent.py` |
 | **CrewAI** | `adapters.crewai.trace_from_crewai(tasks, crew.kickoff())` | `examples/crewai_agent.py` |
 | **OpenAI Agents SDK / LlamaIndex / OpenTelemetry** | turn spans into `{name, parent, output}` and call `adapters.spans.trace_from_spans(traces)` | span recipe below |
 
-Every example runs with **no framework installed** (stand-ins mirror the real shape), so you can see
-how capture works first, then swap in your real app.
+Every example runs with **no framework installed** (stand-ins mirror the real shape), so you can
+see how recording works first, then swap in your real app.
 
 ```python
 from replaygate.adapters.spans import trace_from_spans
@@ -123,27 +159,27 @@ trace = trace_from_spans([[{"name": "retrieve", "parent": None, "output": docs},
 
 ## It tells you when it might be wrong
 
-ReplayGate saves time by reusing old results for steps your change can't touch. That is safe only if
-it knows how the steps connect. If a connection is missing, it could reuse a stale result and miss a
-real problem.
+ReplayGate is fast because it reuses old results for the steps your change can't touch. That's only
+safe if it knows how the steps connect. If a connection is missing, it could reuse an old result and
+miss a real problem.
 
 ReplayGate is upfront about this:
 
 - It **measures how often it misses**, on a test with known answers: `replaygate benchmark`.
-- When it isn't sure a step is safe to reuse, it **re-runs the step**.
+- When it isn't sure a step is safe to reuse, it **re-runs the step** instead of guessing.
 - You can always do a **full re-run** with `--mode full`: slower, but always correct.
 
 ## Compared to other tools
 
-- Tools that replay recorded outputs catch wiring bugs, but can't test a prompt or model *change*
-  (the recording is the very thing the change would alter). ReplayGate tests the change.
+- Some tools replay recorded outputs to catch wiring bugs, but they can't test a prompt or model
+  *change* (the recording is the very thing the change would alter). ReplayGate tests the change.
 - Tools like DeepEval and promptfoo compare prompts on hand-written examples. ReplayGate uses your
   real past runs instead.
 
 ## What it supports
 
-Agents whose steps run in a simple one-way order (no loops), where you've said how the steps connect.
-Loops and hidden-state agents are turned away, not guessed at. The guiding rules are in
+Agents whose steps run in a simple one-way order (no loops), where you've said how the steps
+connect. Loops and hidden-state agents are turned away, not guessed at. The guiding rules are in
 `.specify/memory/constitution.md`.
 
 ---
