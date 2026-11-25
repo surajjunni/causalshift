@@ -26,8 +26,8 @@ def _inconclusive_reason(v: RegressionVerdict, margin: float, min_samples: int) 
     if v.n_usable < min_samples:
         return (f"too few usable trajectories ({v.n_usable} < {min_samples}) for a "
                 "confident call; record and ingest more trajectories")
-    if margin > 0 and v.ci_low < -margin <= v.ci_high:
-        return ("the 95% CI straddles the non-inferiority margin, so non-regression "
+    if v.ci_low < -margin <= v.ci_high:
+        return ("the 95% CI crosses the degradation boundary, so non-regression "
                 "cannot be demonstrated")
     return "insufficient statistical evidence to conclude"
 

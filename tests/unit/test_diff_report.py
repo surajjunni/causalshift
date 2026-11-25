@@ -60,6 +60,16 @@ def test_markdown_format():
     assert "**✗ FAIL" in r
 
 
+def test_zero_margin_inconclusive_names_boundary_reason():
+    # at the zero-margin default, a CI straddling 0 is INCONCLUSIVE and the report must give
+    # the specific CI-crossing reason, not a generic one (review P3).
+    v = RegressionVerdict(workflow_id="w", mode="selective", n_trajectories=4, regressed=False,
+                          magnitude=-0.05, ci_low=-0.2, ci_high=0.1, inconclusive=0,
+                          status="INCONCLUSIVE", n_usable=4)
+    r = diff_report(v, targets=["x"], selective_calls=0, full_estimate=4)  # margin=0 default
+    assert "crosses the degradation boundary" in r
+
+
 def test_inconclusive_insufficient_evidence_reason():
     v = RegressionVerdict(workflow_id="w", mode="selective", n_trajectories=2, regressed=False,
                           magnitude=-0.1, ci_low=-0.3, ci_high=0.1, inconclusive=0,

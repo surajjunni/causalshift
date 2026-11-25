@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -22,8 +23,8 @@ from replaygate.store.validate import TraceInputError
 
 def _nonneg_float(s: str) -> float:
     v = float(s)
-    if v < 0:
-        raise argparse.ArgumentTypeError("must be >= 0")
+    if not math.isfinite(v) or v < 0:
+        raise argparse.ArgumentTypeError("must be a finite number >= 0")
     return v
 
 
