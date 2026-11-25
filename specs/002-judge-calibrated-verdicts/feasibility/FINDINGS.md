@@ -203,21 +203,25 @@ on a moderate judge).
 # Label-efficiency experiment — `real_label_efficiency.py`
 
 The decisive commercial question is not actionability but **how many human labels PPI saves**. Swept
-budgets 10–80 on the same real data (coverage / actionable / RMSE per budget), and converted PPI's
-accuracy gain into an effective-sample multiplier `(RMSE_human / RMSE_ppi)²`.
+budgets 10–80 on the same real data, taking the variance-efficiency ratio `R = (RMSE_human/RMSE_ppi)²`
+and converting it to a human-equivalent budget **under without-replacement sampling** from the N=100
+docs: `m = 1 / ((1−n/N)/(n·R) + 1/N)` (NOT the naive `m = n·R`, which assumes variance ∝ 1/n).
 
-| budget | human RMSE | PPI RMSE | PPI effective | labels saved |
-|---|---|---|---|---|
-| 10 | 0.339 | 0.300 | 1.28× | ~2.8 (22%) |
-| 20 | 0.227 | 0.202 | 1.27× | ~5.3 (21%) |
-| 30 | 0.174 | 0.154 | 1.28× | ~8.3 (22%) |
-| 50 | 0.114 | 0.101 | 1.28× | ~13.9 (22%) |
-| 80 | 0.057 | 0.050 | 1.28× | ~22.5 (22%) |
+| budget n | human RMSE | PPI RMSE | variance ratio R | human-equiv m | labels saved |
+|---|---|---|---|---|---|
+| 10 | 0.339 | 0.300 | 1.28× | 12.4 | ~2.4 (24% of n) |
+| 20 | 0.227 | 0.202 | 1.27× | 24.0 | ~4.0 (20%) |
+| 30 | 0.174 | 0.154 | 1.28× | 35.3 | ~5.3 (18%) |
+| 50 | 0.114 | 0.101 | 1.28× | 56.1 | ~6.1 (12%) |
+| 80 | 0.057 | 0.050 | 1.28× | 83.7 | ~3.7 (5%) |
 
-- **PPI saves a stable ~22% of human labels** to reach the same accuracy (1.28× effective sample),
-  consistent across budgets, with a real, moderately-informative judge (ρ_Δ = 0.60).
-- Coverage stays honest (93–100%) and actionable-rate is within ~2–4 points of human-only throughout
-  — the label savings show up in **accuracy/variance, not in the coarse actionable metric**.
+- **PPI's variance efficiency is a steady ~1.28×** (sampling-fraction independent). But the actual
+  human-label saving is **modest and NOT a constant 22%**: under without-replacement sampling it peaks
+  around 5–6 labels mid-range and **shrinks toward zero as the budget approaches the corpus** (24% of
+  n at n=10 → 5% at n=80). The earlier flat-22% figure wrongly assumed variance ∝ 1/n; at n=80 it even
+  implied 102 human-equivalent labels, impossible in 100 docs. (Fix per review.)
+- Coverage stays honest (~92–95%) and actionable-rate is within ~2–4 points of human-only throughout
+  — the small benefit shows up in **accuracy/variance, not in the coarse actionable metric**.
 
 ### On the correlation question (important)
 
@@ -228,8 +232,9 @@ measure for a regression verdict, and it is the realistic value for GPT-4-on-Sum
 ## Final go / no-go
 
 - **NO-GO** for shipping PPI as ReplayGate v2's **flagship** capability. On a realistic judge its
-  benefits are: a **safety wrapper** (coverage 24%→~94%, false-approval 8.4%→0%) and a **modest ~22%
-  label saving** — real, but not a flagship product on their own.
+  benefits are: a **safety wrapper** (coverage 24%→~94%, false-approval 8.4%→0%) and a **modest,
+  budget-dependent label saving** (variance efficiency ~1.28×; a few labels in practice) — real, but
+  not a flagship product on their own.
 - **GO** for: (1) publishing this as an empirical study — *the limits of LLM judges in deployment
   decisions*, where the 24%→~94% coverage contrast and the honest synthetic-vs-real power gap are the
   contribution; (2) optionally offering PPI as a thin, clearly-scoped safety/efficiency add-on to v1,
@@ -269,11 +274,13 @@ plug-in rather than full design-based variance). They are a directional probe on
 # FINAL VERDICT
 
 - **NO-GO** for a judge-calibration-defined ReplayGate v2 (no elaborate calibration platform, drift
-  service, or new deployment policy built just to gain ~22% label efficiency).
+  service, or new deployment policy built just to gain a ~1.28× variance efficiency / a few labels).
 - **Conditional GO** for a **small, optional PPI estimator** that enhances v1's evaluation: its real,
   validated value is (a) a safety wrapper preventing the naive judge's confidently-wrong approvals
-  (coverage 24%→~94%, false-approval 8.4%→0%) and (b) a stable ~22% human-label saving — useful, not
-  defining. Note 22% *label* saving ≠ 22% *cost* saving (PPI adds judge inference + integration).
+  (coverage 24%→~94%, false-approval 8.4%→0%) and (b) a steady ~1.28× variance efficiency that
+  translates to a modest, budget-dependent label saving (a few labels; shrinking as the budget nears
+  the corpus) — useful, not defining. And any label saving ≠ an equal *cost* saving (PPI adds judge
+  inference + integration).
 - **GO** for an **empirical write-up**: *the limits of LLM judges in deployment decisions* (the
   24%→~94% coverage contrast, the synthetic-vs-real power gap, the honest 1.28× efficiency, and the
   active-sampling null result).

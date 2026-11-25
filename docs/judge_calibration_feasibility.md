@@ -117,8 +117,10 @@ The power result did not survive. On this real, moderately-informative judge (it
 correlation with humans was 0.60, not the near-perfect alignment the synthetic best case assumed),
 PPI's actionable-decision rate was a statistical tie with just labeling the examples yourself. A
 careful label-efficiency sweep put a number on the real benefit: PPI is worth about a 1.28x effective
-sample, a steady 22 percent reduction in human labels, no more. And a 22 percent cut in labels is not
-a 22 percent cut in cost once you account for the judge inference and plumbing PPI adds. An attempt to
+sample. Translated into actual human labels, drawn without replacement from a hundred documents, that
+is a modest saving that shrinks as you label more of the corpus: a few labels at low budgets, almost
+nothing near full coverage, not a flat 22 percent. And even those saved labels are not a free cost
+cut, once you account for the judge inference and plumbing PPI adds. An attempt to
 beat that with active label selection gave nothing, and a naive weighting scheme briefly blew the
 estimate up by a factor of twenty, a reminder that the clever version is its own research problem.
 

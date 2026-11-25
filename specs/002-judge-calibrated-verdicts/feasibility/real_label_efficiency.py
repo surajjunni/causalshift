@@ -70,12 +70,16 @@ for n in BUDGETS:
                 stats[key]["act"].append((lo > -MARGIN) or (hi < -MARGIN))
                 stats[key]["rmse"].append((m - mu) ** 2)
     hR = np.sqrt(np.mean(stats["h"]["rmse"])); pR = np.sqrt(np.mean(stats["p"]["rmse"]))
-    mult = (hR / pR) ** 2                      # effective-sample multiplier
-    equiv = n * mult                           # human labels needed to match PPI@n
+    R = (hR / pR) ** 2                         # variance-efficiency ratio (FPC cancels at equal n)
+    # Human-only budget m to match PPI@n accuracy, WITHOUT-REPLACEMENT from N docs:
+    #   (1 - m/N) s_h^2 / m = (1 - n/N) s_r^2 / n   =>   m = 1 / ( (1-n/N)/(n*R) + 1/N )
+    A = (1 - n / nD) / (n * R)
+    equiv = min(1.0 / (A + 1.0 / nD), float(nD))   # capped at the finite population
     saved = equiv - n
     print(f"   {n:4d}  | {np.mean(stats['h']['cov'])*100:4.1f}% / {np.mean(stats['h']['act'])*100:4.1f}% / {hR:.3f}  "
           f"| {np.mean(stats['p']['cov'])*100:4.1f}% / {np.mean(stats['p']['act'])*100:4.1f}% / {pR:.3f}   "
-          f"| {mult:.2f}x    ~{saved:4.1f} ({(1-1/mult)*100:3.0f}%)")
-print("  " + "-" * 82)
-print("  PPI eff. = (RMSE_human / RMSE_ppi)^2 = human labels equivalent to 1 PPI label.")
-print("  'labels saved' = extra human labels needed to match PPI@n accuracy (and % of budget).")
+          f"| {R:.2f}x    equiv {equiv:4.1f}  saved {saved:4.1f} ({saved/n*100:3.0f}% of n)")
+print("  " + "-" * 92)
+print("  R = (RMSE_human/RMSE_ppi)^2 = variance-efficiency ratio (sampling-fraction independent).")
+print("  equiv = human-only labels matching PPI@n accuracy under WITHOUT-REPLACEMENT sampling")
+print("  from N=100 docs (capped at N). saved = equiv - n. Note the saving shrinks as n -> N.")
