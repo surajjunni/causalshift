@@ -53,6 +53,9 @@ class Workflow:
     edges: list[tuple[str, str]]          # declared dependency edges (src -> dst)
     trajectories: list[Trajectory] = field(default_factory=list)
     prompts: dict[str, str] = field(default_factory=dict)  # prompt_id -> system prompt text
+    # "declared" = dependencies were explicitly instrumented; "unverified" = captured from
+    # control-flow only (e.g. a LangGraph graph) so declared edges may be incomplete.
+    dependency_coverage: str = "declared"
 
 
 @dataclass

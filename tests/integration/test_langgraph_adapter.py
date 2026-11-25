@@ -82,3 +82,22 @@ def test_trace_marks_dependency_coverage_unverified():
     # are proven complete for this workflow.
     trace = trace_from_langgraph(_app(), inputs=[{"q": "a"}], workflow_id="lg", warn=False)
     assert trace["dependency_coverage"] == "unverified"
+
+
+def test_dependency_coverage_survives_ingest_and_hydrate():
+    # the annotation must reach the gate, not vanish at ingest (review follow-up).
+    trace = trace_from_langgraph(_app(), inputs=[{"q": "a"}], workflow_id="lg", warn=False)
+    store = TraceStore(":memory:")
+    store.ingest(workflow_from_dict(trace))
+    assert store.hydrate("lg").dependency_coverage == "unverified"
+
+
+def test_absent_coverage_defaults_to_declared():
+    raw = {"workflow_id": "w", "graph": {"nodes": ["a"], "edges": []},
+           "trajectories": [{"trajectory_id": "t", "steps": [
+               {"step_index": 0, "node_name": "a", "input_fingerprint": "f", "output": "o"}]}]}
+    wf = workflow_from_dict(raw)
+    assert wf.dependency_coverage == "declared"
+    store = TraceStore(":memory:")
+    store.ingest(wf)
+    assert store.hydrate("w").dependency_coverage == "declared"

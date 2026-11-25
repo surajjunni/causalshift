@@ -89,3 +89,11 @@ def test_attribution_shown_only_when_it_adds_info():
                              magnitude=-0.7, ci_low=-0.9, ci_high=-0.4,
                              attribution=[("planner", -0.5)], status="FAIL", n_usable=4)
     assert "attribution:" in diff_report(diff, ["responder"], 4, 12)
+
+
+def test_report_flags_unverified_dependency_coverage():
+    r = diff_report(_v(True), targets=["x"], selective_calls=4, full_estimate=12,
+                    dependency_coverage="unverified")
+    assert "dependency_coverage=unverified" in r
+    # the default (explicitly instrumented) adds no deps line
+    assert "dependency_coverage" not in diff_report(_v(True), ["x"], 4, 12)

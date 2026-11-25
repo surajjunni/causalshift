@@ -129,10 +129,12 @@ def _cmd_diff(args) -> int:
     if args.json:
         print(json.dumps(verdict.__dict__ | {
             "selective_calls": selective_calls, "full_estimate": full_estimate,
-            "targets": list(intervention.targets), "margin": args.margin}, indent=2, default=list))
+            "targets": list(intervention.targets), "margin": args.margin,
+            "dependency_coverage": wf.dependency_coverage}, indent=2, default=list))
     else:
         print(diff_report(verdict, list(intervention.targets), selective_calls, full_estimate,
-                          margin=args.margin, min_samples=args.min_samples, fmt=args.format))
+                          margin=args.margin, min_samples=args.min_samples, fmt=args.format,
+                          dependency_coverage=wf.dependency_coverage))
     return verdict_exit_code(verdict)
 
 

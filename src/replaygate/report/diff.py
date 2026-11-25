@@ -61,7 +61,8 @@ def _attribution_node(v: RegressionVerdict, targets: list[str]):
 
 def diff_report(verdict: RegressionVerdict, targets: list[str],
                 selective_calls: int, full_estimate: int,
-                margin: float = 0.0, min_samples: int = 3, fmt: str = "text") -> str:
+                margin: float = 0.0, min_samples: int = 3, fmt: str = "text",
+                dependency_coverage: str = "declared") -> str:
     code = verdict_exit_code(verdict)
     saved = max(0, full_estimate - selective_calls)
     pct = (saved / full_estimate * 100) if full_estimate else 0.0
@@ -74,6 +75,9 @@ def diff_report(verdict: RegressionVerdict, targets: list[str],
             f"full re-execution ≈ {full_estimate} (saved ~{saved}, {pct:.0f}%)")
     reuse = (f"{verdict.reuse_exposure:.2f} — fraction of nodes reused, not a miss "
              "probability") if verdict.reuse_exposure is not None else None
+    deps = (f"dependency_coverage={dependency_coverage} — declared edges may be incomplete "
+            "(control-flow capture), so reuse may be optimistic"
+            ) if dependency_coverage != "declared" else None
     soundness = ("run `replaygate benchmark` for the measured false-negative rate "
                  "(95% CI) on labeled cases")
     rec = _recommendation(verdict, code, margin, min_samples)
@@ -85,6 +89,8 @@ def diff_report(verdict: RegressionVerdict, targets: list[str],
         rows.append(("cost", cost))
         if reuse:
             rows.append(("reuse exposure", reuse))
+        if deps:
+            rows.append(("deps", deps))
         rows.append(("soundness", soundness))
         rows.append(("exit", f"{code}  (0 PASS / 1 FAIL / 2 INCONCLUSIVE)"))
         body = "\n".join(f"| {k} | {v} |" for k, v in rows)
@@ -107,6 +113,8 @@ def diff_report(verdict: RegressionVerdict, targets: list[str],
     lines.append(f"  cost:         {cost}")
     if reuse:
         lines.append(f"  reuse:        exposure {reuse}")
+    if deps:
+        lines.append(f"  deps:         {deps}")
     lines.append(f"  soundness:    {soundness}")
     lines.append(f"  exit:         {code}  (0 PASS / 1 FAIL / 2 INCONCLUSIVE)")
     return "\n".join(lines)
