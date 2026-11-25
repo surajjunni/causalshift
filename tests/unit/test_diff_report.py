@@ -21,7 +21,7 @@ def test_fail_report_shows_verdict_cost_and_exposure():
 
 def test_pass_report():
     r = diff_report(_v(False, exposure=0.5), targets=["planner"], selective_calls=2, full_estimate=12)
-    assert "PASS — no regression detected" in r
+    assert "PASS — no material regression" in r
     assert "exit:         0" in r
 
 
@@ -43,7 +43,8 @@ def test_fail_banner_and_recommendation():
 def test_pass_banner_and_recommendation():
     r = diff_report(_v(False, exposure=0.5), targets=["planner"], selective_calls=2, full_estimate=12)
     assert "✓ PASS" in r
-    assert "Safe to ship" in r
+    assert "No material regression" in r
+    assert "Not a broader safety guarantee" in r
 
 
 def test_margin_is_shown():

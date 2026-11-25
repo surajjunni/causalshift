@@ -45,3 +45,13 @@ def test_non_inferiority_margin_straddle_is_not_pass():
     v = build_verdict("w", "selective", deltas, min_samples=3, epsilon=0.2)
     assert v.status in ("INCONCLUSIVE", "FAIL")
     assert verdict_exit_code(v) != 0
+
+
+def test_zero_margin_straddling_ci_is_not_silent_pass():
+    # default epsilon=0: a CI straddling 0 does NOT prove non-regression, so it must be
+    # INCONCLUSIVE, never a silent PASS (keeps the verdict consistent with the diff report's
+    # "the whole 95% CI is above the boundary" message). Regression test for the review's P1.
+    deltas = [_r(d) for d in (-0.5, -0.5, -0.5, 0.5, 0.5, 0.5)]
+    v = build_verdict("w", "selective", deltas, min_samples=3)   # epsilon=0 (default)
+    assert v.status == "INCONCLUSIVE"
+    assert verdict_exit_code(v) == 2

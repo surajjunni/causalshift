@@ -12,7 +12,7 @@ from replaygate.report.verdict import verdict_exit_code
 
 _GLYPH = {0: "✓", 1: "✗", 2: "?"}
 _WORD = {
-    0: "PASS — no regression detected",
+    0: "PASS — no material regression (under the configured evaluator and margin)",
     1: "FAIL — quality regresses",
     2: "INCONCLUSIVE — insufficient evidence (fails closed, blocks deploy)",
 }
@@ -34,7 +34,9 @@ def _inconclusive_reason(v: RegressionVerdict, margin: float, min_samples: int) 
 
 def _recommendation(v: RegressionVerdict, code: int, margin: float, min_samples: int) -> str:
     if code == 0:
-        return "Safe to ship: quality did not drop beyond the margin (95% CI stays above it)."
+        return ("No material regression under the configured evaluator and margin — the whole "
+                "95% CI stays above the boundary. (Not a broader safety guarantee: judge and "
+                "replay uncertainty remain.)")
     if code == 1:
         return "Don't ship: quality regresses — the 95% CI is entirely past the margin."
     return "Can't decide (blocks deploy): " + _inconclusive_reason(v, margin, min_samples)

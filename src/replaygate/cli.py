@@ -19,6 +19,20 @@ from replaygate.report.verdict import build_verdict, format_verdict, verdict_exi
 from replaygate.store.db import TraceStore, load_workflow
 from replaygate.store.validate import TraceInputError
 
+
+def _nonneg_float(s: str) -> float:
+    v = float(s)
+    if v < 0:
+        raise argparse.ArgumentTypeError("must be >= 0")
+    return v
+
+
+def _pos_int(s: str) -> int:
+    v = int(s)
+    if v < 1:
+        raise argparse.ArgumentTypeError("must be >= 1")
+    return v
+
 DEFAULT_DB = "replaygate.db"
 
 
@@ -168,10 +182,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_df.add_argument("--model", default="llama3:latest")
     p_df.add_argument("--judge-model", default="llama3:latest")
     p_df.add_argument("--max-recompute", type=int, default=None)
-    p_df.add_argument("--margin", type=float, default=0.0,
-                      help="non-inferiority margin: PASS needs the 95%% CI to stay above -margin")
-    p_df.add_argument("--min-samples", type=int, default=3,
-                      help="fewer usable trajectories than this → INCONCLUSIVE (fail closed)")
+    p_df.add_argument("--margin", type=_nonneg_float, default=0.0,
+                      help="non-inferiority margin (>= 0): PASS needs the 95%% CI to stay above -margin")
+    p_df.add_argument("--min-samples", type=_pos_int, default=3,
+                      help="minimum usable trajectories (>= 1); fewer → INCONCLUSIVE (fail closed)")
     p_df.add_argument("--format", choices=["text", "markdown"], default="text",
                       help="human-readable output format (use --json for machine-readable)")
     p_df.add_argument("--json", action="store_true")
