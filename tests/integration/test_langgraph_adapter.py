@@ -101,3 +101,36 @@ def test_absent_coverage_defaults_to_declared():
     store = TraceStore(":memory:")
     store.ingest(wf)
     assert store.hydrate("w").dependency_coverage == "declared"
+
+
+def test_unverified_capture_blocks_a_passing_selective_verdict():
+    # End-to-end (review): ingest a LangGraph 'unverified' capture, run an otherwise-passing
+    # selective evaluation, and confirm the gate downgrades PASS -> INCONCLUSIVE (exit 2).
+    from replaygate.models import Intervention
+    from replaygate.replay.engine import selective_replay
+    from replaygate.backends.base import UnavailableBackend
+    from replaygate.evaluate.quality import TerminalSignalEvaluator
+    from replaygate.report.verdict import (
+        build_verdict, gate_unverified_dependencies, verdict_exit_code,
+    )
+
+    trace = trace_from_langgraph(
+        _app(), inputs=[{"q": "a"}, {"q": "bb"}, {"q": "ccc"}, {"q": "dddd"}],
+        workflow_id="lg", warn=False)
+    store = TraceStore(":memory:")
+    store.ingest(workflow_from_dict(trace))
+    wf = store.hydrate("lg")
+    assert wf.dependency_coverage == "unverified"
+
+    g = DependencyGraph(wf)
+    noop = Intervention(workflow_id="lg", targets={})   # change nothing -> reuse all, delta 0
+    evaluator = TerminalSignalEvaluator(target="answerer")
+    results = [selective_replay(t, g, noop, UnavailableBackend(), evaluator)
+               for t in wf.trajectories]
+    verdict = build_verdict("lg", "selective", results)
+    assert verdict.status == "PASS"                     # otherwise safe
+
+    downgraded = gate_unverified_dependencies(verdict, wf.dependency_coverage)
+    assert downgraded is True
+    assert verdict.status == "INCONCLUSIVE"
+    assert verdict_exit_code(verdict) == 2
