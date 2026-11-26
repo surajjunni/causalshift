@@ -1,17 +1,37 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "replaygate"
 version = "0.1.0"
-description = "Causal regression testing for model/prompt changes in LLM-agent pipelines"
+description = "Catch quality regressions from prompt and model changes by selectively replaying your agent's real past runs"
 readme = "README.md"
 requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "surajjunni" }]
+keywords = [
+    "llm", "agent", "regression-testing", "prompt-testing", "model-swap",
+    "llm-evaluation", "llmops", "ci", "selective-replay", "langgraph",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 dependencies = [
     "networkx>=3.0",
     "numpy>=1.26",
 ]
+
+[project.urls]
+Homepage = "https://github.com/surajjunni/replaygate"
+Repository = "https://github.com/surajjunni/replaygate"
+Issues = "https://github.com/surajjunni/replaygate/issues"
 
 [project.optional-dependencies]
 langgraph = ["langgraph>=0.2"]
