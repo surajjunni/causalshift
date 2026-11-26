@@ -29,10 +29,14 @@ It's fast because it only re-runs the steps your change can actually affect.
 ## Install
 
 ```bash
-uv venv && uv pip install -e ".[dev]"   # or: pip install -e ".[dev]"
+pip install replaygate
 ```
 
-This installs ReplayGate. You need Python 3.12 or newer.
+That's all you need to use it (Python 3.12 or newer). To hack on ReplayGate itself, install from a clone instead:
+
+```bash
+uv venv && uv pip install -e ".[dev]"   # or: pip install -e ".[dev]"
+```
 
 ## Try it
 
